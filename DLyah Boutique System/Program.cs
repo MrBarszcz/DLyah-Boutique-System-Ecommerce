@@ -15,6 +15,7 @@ builder.Services.AddDbContext<BankContext>(options =>
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>(); // Every time it is called, call the CategoryRepository
 builder.Services.AddScoped<ISizeRepository, SizeRepository>();
 builder.Services.AddScoped<IColorRepository, ColorRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 
 var app = builder.Build();

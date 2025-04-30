@@ -7,7 +7,7 @@
 
 <div class="text-center">
     <div class="text-end">
-        <a role="button" class="btn btn-primary" asp-controller="ControlPanel" asp-action="RegisterProduct"><i
+        <a role="button" class="btn btn-primary" asp-controller="Product" asp-action="RegisterProduct"><i
                 class="bi bi-send-plus"></i></a>
     </div>
 
@@ -141,7 +141,7 @@
                     <td>
                         <div class="btn-group" role="group">
                             <a role="button" class="btn btn-outline-primary" asp-route-id="@product.Product.ProductId"
-                               asp-controller="ControlPanel" asp-action="EditProduct"><i class="bi bi-pencil-fill"></i></a>
+                               asp-controller="Product" asp-action="EditProduct"><i class="bi bi-pencil-fill"></i></a>
                             <a role="button" class="btn btn-danger btn-delete-product"
                                color-id="@product.Product.ProductId"><i class="bi bi-trash3"></i></a>
                         </div>

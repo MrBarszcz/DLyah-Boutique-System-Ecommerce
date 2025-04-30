@@ -7,7 +7,7 @@
 <div class="text-center">
     <h1 class="display-4">Atualizar Tamanho</h1>
 
-    <form class="form-control" asp-controller="ControlPanel" asp-action="EditSize" method="post">
+    <form class="form-control" asp-controller="Size" asp-action="EditSize" method="post">
         <input type="hidden" asp-for="SizeId"/>
         
         <div class="mb-3">
@@ -16,7 +16,7 @@
         </div>
 
         <div class="btn-group" role="group">
-            <a role="button" class="btn btn-outline-danger" asp-controller="ControlPanel" asp-action="Size">Voltar</a>
+            <a role="button" class="btn btn-outline-danger" asp-controller="Size" asp-action="Index">Voltar</a>
             <button type="submit" class="btn btn-primary text-end">Atualizar</button>
         </div>
     </form>

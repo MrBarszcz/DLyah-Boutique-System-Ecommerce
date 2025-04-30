@@ -48,9 +48,9 @@ public class BankContext : DbContext {
 
         // Configurações de chave primária e nomes de coluna (se necessário para corresponder ao SQL)
         modelBuilder.Entity<StockProductModel>()
-            .HasKey(si => si.StockItemId);
+            .HasKey(si => si.StockId);
             
-        modelBuilder.Entity<StockProductModel>().Property(sp => sp.StockItemId).HasColumnName("stock_prduct_id"); // Especifica o nome da coluna da chave primária
+        modelBuilder.Entity<StockProductModel>().Property(sp => sp.StockId).HasColumnName("stock_prduct_id"); // Especifica o nome da coluna da chave primária
 
         modelBuilder.Entity<StockProductModel>()
             .Property(si => si.ProductId)

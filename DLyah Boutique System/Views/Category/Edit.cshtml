@@ -7,7 +7,7 @@
 <div class="text-center">
     <h1 class="display-4">Atualizar Categoria</h1>
 
-    <form class="form-control" asp-controller="ControlPanel" asp-action="EditCategory" method="post">
+    <form class="form-control" asp-controller="Category" asp-action="EditCategory" method="post">
         <input type="hidden" asp-for="CategoryId"/>
         
         <div class="mb-3">
@@ -16,7 +16,7 @@
         </div>
 
         <div class="btn-group" role="group">
-            <a role="button" class="btn btn-outline-danger" asp-controller="ControlPanel" asp-action="Category">Voltar</a>
+            <a role="button" class="btn btn-outline-danger" asp-controller="Category" asp-action="Index">Voltar</a>
             <button type="submit" class="btn btn-primary text-end">Atualizar</button>
         </div>
     </form>

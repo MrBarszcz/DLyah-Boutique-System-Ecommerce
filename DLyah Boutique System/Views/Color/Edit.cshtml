@@ -7,9 +7,9 @@
 <div class="text-center">
     <h1 class="display-4">Atualizar Cor</h1>
 
-    <form class="form-control" asp-controller="ControlPanel" asp-action="EditColor" method="post">
+    <form class="form-control" asp-controller="Color" asp-action="EditColor" method="post">
         <input type="hidden" asp-for="ColorId"/>
-        
+
         <div class="mb-3">
             <label for="color" class="form-label">Tamanho</label>
             <input type="text" asp-for="Color" class="form-control" id="color" placeholder="Ex: Camisa">
@@ -21,7 +21,7 @@
         </div>
 
         <div class="btn-group" role="group">
-            <a role="button" class="btn btn-outline-danger" asp-controller="ControlPanel" asp-action="Color">Voltar</a>
+            <a role="button" class="btn btn-outline-danger" asp-controller="Color" asp-action="Index">Voltar</a>
             <button type="submit" class="btn btn-primary text-end">Atualizar</button>
         </div>
     </form>

@@ -6,7 +6,7 @@
 
 <div class="text-center">
     <div class="text-end">
-        <a role="button" class="btn btn-primary" asp-controller="ControlPanel" asp-action="RegisterSize"><i class="bi bi-send-plus"></i></a>
+        <a role="button" class="btn btn-primary" asp-controller="Size" asp-action="RegisterSize"><i class="bi bi-send-plus"></i></a>
     </div>
 
     <h1 class="display-4">Listagem de Categorias</h1>
@@ -23,23 +23,23 @@
         </tr>
         </thead>
         <tbody>
-            @if (Model != null && Model.Any()) {
-                foreach (SizeModel size in Model) {
-                    <tr>
-                        <th scope="row">@size.SizeId</th>
-                        <td>@size.Size</td>
-                        <td>
-                            <a href="javascript:" class="btn btn-success btn-total-products">10</a>
-                        </td>
-                        <td>
-                            <div class="btn-group" role="group">
-                                <a role="button" class="btn btn-outline-primary" asp-route-id="@size.SizeId" asp-controller="ControlPanel" asp-action="EditSize"><i class="bi bi-pencil-fill"></i></a>
-                                <a role="button" class="btn btn-danger btn-delete-Size" Size-id="@size.SizeId"><i class="bi bi-trash3"></i></a>
-                            </div>
-                        </td>
-                    </tr>
-                }
+        @if (Model != null && Model.Any()) {
+            foreach (SizeModel size in Model) {
+                <tr>
+                    <th scope="row">@size.SizeId</th>
+                    <td>@size.Size</td>
+                    <td>
+                        <a href="javascript:" class="btn btn-success btn-total-products">10</a>
+                    </td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a role="button" class="btn btn-outline-primary" asp-route-id="@size.SizeId" asp-controller="Size" asp-action="EditSize"><i class="bi bi-pencil-fill"></i></a>
+                            <a role="button" class="btn btn-danger btn-delete-Size" Size-id="@size.SizeId"><i class="bi bi-trash3"></i></a>
+                        </div>
+                    </td>
+                </tr>
             }
+        }
         </tbody>
     </table>
 
@@ -100,7 +100,7 @@
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <button type="button" class="btn btn-danger">Excluir</button>
                     </div>
-                    
+
                 </div>
             </div>
         </div>

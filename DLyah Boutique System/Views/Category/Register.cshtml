@@ -7,14 +7,14 @@
 <div class="text-center">
     <h1 class="display-4">Cadastrar Categoria</h1>
 
-    <form class="form-control" asp-controller="ControlPanel" asp-action="RegisterCategory" method="post">
+    <form class="form-control" asp-controller="Category" asp-action="RegisterCategory" method="post">
         <div class="mb-3">
             <label for="category" class="form-label">Categoria</label>
             <input type="text" asp-for="Category" class="form-control" id="category"  placeholder="Ex: Camisa">
         </div>
         
         <div class="btn-group" role="group">
-            <a role="button" class="btn btn-outline-danger" asp-controller="ControlPanel" asp-action="Category">Voltar</a>
+            <a role="button" class="btn btn-outline-danger" asp-controller="Category" asp-action="Index">Voltar</a>
             <button type="submit" class="btn btn-primary text-end">Adicionar</button>
         </div>
     </form>
