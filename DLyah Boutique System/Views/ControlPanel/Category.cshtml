@@ -1,0 +1,121 @@
+@model List<CategoryModel>
+
+@{
+    Layout = "_Layout";
+}
+
+<div class="text-center">
+    <div class="text-end">
+        <a role="button" class="btn btn-primary" asp-controller="ControlPanel" asp-action="RegisterCategory"><i class="bi bi-send-plus"></i></a>
+    </div>
+
+    <h1 class="display-4">Listagem de Categorias</h1>
+
+    <br>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Categoria</th>
+            <th scope="col">Cadastros</th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any()) { // If the list inherited from the model is not null and contains something
+                foreach (CategoryModel category in Model) { // Iterates through each item in the list of categories (Model)
+                    <tr>
+                        <th scope="row">@category.CategoryId</th>
+                        <td>@category.Category</td>
+                        <td>
+                            <a href="javascript:" class="btn btn-success btn-total-products">10</a> @* Shows the number of clothes registered with this category, Open a modal that shows these clothes *@
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a role="button" class="btn btn-outline-primary" asp-route-id="@category.CategoryId" asp-controller="ControlPanel" asp-action="EditCategory"><i class="bi bi-pencil-fill"></i></a>
+                                <a role="button" class="btn btn-danger btn-delete-category" category-id="@category.CategoryId"><i class="bi bi-trash3"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+    <div class="modal" id="modalProductCategory" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title display-6">Produtos Cadastrados como Camisas</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Nome</th>
+                            <th scope="col">Categorias</th>
+                            <th scope="col">Estoque</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <th scope="row">1</th>
+                            <td>Camisa de seda</td>
+                            <td>
+                                <ul>
+                                    <li>Camisa</li>
+                                </ul>
+                            </td>
+                            <td>25</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Conjunto Smooking</td>
+                            <td>
+                                <ul>
+                                    <li>Camisa</li>
+                                    <li>Blazer</li>
+                                    <li>Calça</li>
+                                    <li>Gravata</li>
+                                    <li>Colete</li>
+                                </ul>
+                            </td>
+                            <td>14</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modalDeleteCategory" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Você tem certeza que deseja excluir a categoria Camisas? Essa ação não pode ser desfeita.</h6>
+                    <p>Essa ação não irá excluir os 10 produtos cadastrados nessa categoria</p>
+                    <p>só removerá essa categoria do cadastro deles</p>
+                </div>
+                <div class="modal-footer">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-danger">Excluir</button>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

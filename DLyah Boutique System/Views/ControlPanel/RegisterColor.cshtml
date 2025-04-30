@@ -1,0 +1,26 @@
+@model ColorModel
+
+@{
+    Layout = "_Layout";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Cadastrar Tamanho</h1>
+
+    <form class="form-control" asp-controller="ControlPanel" asp-action="RegisterColor" method="post">
+        <div class="mb-3">
+            <label for="color" class="form-label">Cor</label>
+            <input type="text" asp-for="Color" class="form-control" id="color"  placeholder="Ex: Vermelho">
+        </div>
+
+        <div class="mb-3">
+            <label for="hexColor" class="form-label">Escolha a cor</label>
+            <input type="color" asp-for="HexColor" class="form-control color-box" id="hexColor">
+        </div>
+        
+        <div class="btn-group" role="group">
+            <a role="button" class="btn btn-outline-danger" asp-controller="ControlPanel" asp-action="Color">Voltar</a>
+            <button type="submit" class="btn btn-primary text-end">Adicionar</button>
+        </div>
+    </form>
+</div>

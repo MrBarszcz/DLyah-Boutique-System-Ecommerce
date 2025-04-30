@@ -1,0 +1,23 @@
+@model SizeModel
+
+@{
+    Layout = "_Layout";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Atualizar Tamanho</h1>
+
+    <form class="form-control" asp-controller="ControlPanel" asp-action="EditSize" method="post">
+        <input type="hidden" asp-for="SizeId"/>
+        
+        <div class="mb-3">
+            <label for="size" class="form-label">Tamanho</label>
+            <input type="text" asp-for="Size" class="form-control" id="size" placeholder="Ex: Camisa">
+        </div>
+
+        <div class="btn-group" role="group">
+            <a role="button" class="btn btn-outline-danger" asp-controller="ControlPanel" asp-action="Size">Voltar</a>
+            <button type="submit" class="btn btn-primary text-end">Atualizar</button>
+        </div>
+    </form>
+</div>

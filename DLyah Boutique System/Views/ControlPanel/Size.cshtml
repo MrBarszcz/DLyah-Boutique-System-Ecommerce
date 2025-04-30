@@ -1,0 +1,109 @@
+@model List<SizeModel>
+
+@{
+    Layout = "_Layout";
+}
+
+<div class="text-center">
+    <div class="text-end">
+        <a role="button" class="btn btn-primary" asp-controller="ControlPanel" asp-action="RegisterSize"><i class="bi bi-send-plus"></i></a>
+    </div>
+
+    <h1 class="display-4">Listagem de Categorias</h1>
+
+    <br>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Tamanhos</th>
+            <th scope="col">Cadastros</th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any()) {
+                foreach (SizeModel size in Model) {
+                    <tr>
+                        <th scope="row">@size.SizeId</th>
+                        <td>@size.Size</td>
+                        <td>
+                            <a href="javascript:" class="btn btn-success btn-total-products">10</a>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a role="button" class="btn btn-outline-primary" asp-route-id="@size.SizeId" asp-controller="ControlPanel" asp-action="EditSize"><i class="bi bi-pencil-fill"></i></a>
+                                <a role="button" class="btn btn-danger btn-delete-Size" Size-id="@size.SizeId"><i class="bi bi-trash3"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+    <div class="modal" id="modalProductSize" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title display-6">Produtos Cadastrados com o tamanho P</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Nome</th>
+                            <th scope="col">Tamanhos</th>
+                            <th scope="col">Estoque</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <th scope="row">1</th>
+                            <td>Camisa de seda</td>
+                            <td>
+                                <ul>
+                                    <li>P</li>
+                                    <li>M</li>
+                                    <li>G</li>
+                                </ul>
+                            </td>
+                            <td>25</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modalDeleteSize" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Você tem certeza que deseja excluir o tamanho P? Essa ação não pode ser desfeita.</h6>
+                    <p>Essa ação não irá excluir os 10 produtos cadastrados nesse tamanho</p>
+                    <p>só removerá esse tamanho do cadastro deles</p>
+                </div>
+                <div class="modal-footer">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-danger">Excluir</button>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
