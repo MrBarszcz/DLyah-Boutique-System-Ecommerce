@@ -6,7 +6,7 @@
 
 <div class="text-center">
     <div class="text-end">
-        <a role="button" class="btn btn-primary" asp-controller="Category" asp-action="RegisterCategory"><i class="bi bi-send-plus"></i></a>
+        <a role="button" class="btn btn-primary" asp-controller="Category" asp-action="Register"><i class="bi bi-send-plus"></i></a>
     </div>
 
     <h1 class="display-4">Listagem de Categorias</h1>
@@ -33,7 +33,7 @@
                         </td>
                         <td>
                             <div class="btn-group" role="group">
-                                <a role="button" class="btn btn-outline-primary" asp-route-id="@category.CategoryId" asp-controller="Category" asp-action="EditCategory"><i class="bi bi-pencil-fill"></i></a>
+                                <a role="button" class="btn btn-outline-primary" asp-route-id="@category.CategoryId" asp-controller="Category" asp-action="Edit"><i class="bi bi-pencil-fill"></i></a>
                                 <a role="button" class="btn btn-danger btn-delete-category" category-id="@category.CategoryId"><i class="bi bi-trash3"></i></a>
                             </div>
                         </td>

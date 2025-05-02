@@ -17,24 +17,24 @@ public class ColorController : Controller {
         return View(colors);
     }
 
-    public IActionResult EditColor(int id) {
+    public IActionResult Edit(int id) {
         ColorModel color = _colorRepository.FindById(id);
         return View(color);
     }
     
-    public IActionResult RegisterColor(int id) {
+    public IActionResult Register(int id) {
         return View();
     }
     
     // POST
     [HttpPost]
-    public IActionResult EditColor(ColorModel c) {
+    public IActionResult Edit(ColorModel c) {
         _colorRepository.Update(c);
         return RedirectToAction("Color");
     }
     
     [HttpPost]
-    public IActionResult RegisterColor(ColorModel c) {
+    public IActionResult Register(ColorModel c) {
         if (ModelState.IsValid) {
             _colorRepository.Create(c);
             return RedirectToAction("Color");

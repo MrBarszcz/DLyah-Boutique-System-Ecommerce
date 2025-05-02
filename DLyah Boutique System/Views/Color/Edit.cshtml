@@ -7,7 +7,7 @@
 <div class="text-center">
     <h1 class="display-4">Atualizar Cor</h1>
 
-    <form class="form-control" asp-controller="Color" asp-action="EditColor" method="post">
+    <form class="form-control" asp-controller="Color" asp-action="Edit" method="post">
         <input type="hidden" asp-for="ColorId"/>
 
         <div class="mb-3">
@@ -17,7 +17,7 @@
 
         <div class="mb-3">
             <label for="hexColor" class="form-label">Escolha a cor</label>
-            <input type="color" asp-for="HexColor" class="form-control color-box" id="hexColor">
+            <input type="color" asp-for="HexColor" class="form-control color-box color-l" id="hexColor">
         </div>
 
         <div class="btn-group" role="group">

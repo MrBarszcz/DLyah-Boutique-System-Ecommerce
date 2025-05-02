@@ -16,6 +16,7 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>(); // Every 
 builder.Services.AddScoped<ISizeRepository, SizeRepository>();
 builder.Services.AddScoped<IColorRepository, ColorRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IGenderRepository, GenderRepository>();
 
 
 var app = builder.Build();

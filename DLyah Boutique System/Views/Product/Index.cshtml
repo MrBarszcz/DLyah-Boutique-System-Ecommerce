@@ -7,7 +7,7 @@
 
 <div class="text-center">
     <div class="text-end">
-        <a role="button" class="btn btn-primary" asp-controller="Product" asp-action="RegisterProduct"><i
+        <a role="button" class="btn btn-primary" asp-controller="Product" asp-action="Register"><i
                 class="bi bi-send-plus"></i></a>
     </div>
 
@@ -79,7 +79,7 @@
                                 <ul>
                                     @foreach (var color in product.Colors) {
                                         <li>
-                                            <div class="color-box" style="background-color:@color.HexColor"></div>
+                                            <div class="color-box color-s" style="background-color:@color.HexColor"></div>
                                         </li>
                                     }
                                 </ul>  

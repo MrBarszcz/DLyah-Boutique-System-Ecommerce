@@ -13,30 +13,30 @@ public class CategoryController : Controller {
     
     // GET
     public IActionResult Index() {
-        // lists the categories and has a button that sends to RegisterCategory, UpdateCategory, DeleteCategory
+        // lists the categories and has a button that sends to Register, UpdateCategory, DeleteCategory
         List<CategoryModel> categories = _categoryRepository.FindAll();
         return View(categories);
     }
     
-    public IActionResult EditCategory(int id) { // form to update a category
+    public IActionResult Edit(int id) { // form to update a category
         CategoryModel category = _categoryRepository.FindById(id);
         return View(category);
     }
     
-    public IActionResult RegisterCategory() {
+    public IActionResult Register() {
         // form to register a category
         return View();
     }
     
     // POST
     [HttpPost]
-    public IActionResult EditCategory(CategoryModel ct) {
+    public IActionResult Edit(CategoryModel ct) {
         _categoryRepository.Update(ct);
         return RedirectToAction("Index");
     }
     
     [HttpPost]
-    public IActionResult RegisterCategory(CategoryModel ct) {
+    public IActionResult Register(CategoryModel ct) {
         _categoryRepository.Create(ct);
         return RedirectToAction("Index");
     }

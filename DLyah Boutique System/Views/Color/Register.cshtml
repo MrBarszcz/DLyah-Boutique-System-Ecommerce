@@ -7,7 +7,7 @@
 <div class="text-center">
     <h1 class="display-4">Cadastrar Tamanho</h1>
 
-    <form class="form-control" asp-controller="Color" asp-action="RegisterColor" method="post">
+    <form class="form-control" asp-controller="Color" asp-action="Register" method="post">
         <div class="mb-3">
             <label for="color" class="form-label">Cor</label>
             <input type="text" asp-for="Color" class="form-control" id="color"  placeholder="Ex: Vermelho">
@@ -15,7 +15,7 @@
 
         <div class="mb-3">
             <label for="hexColor" class="form-label">Escolha a cor</label>
-            <input type="color" asp-for="HexColor" class="form-control color-box" id="hexColor">
+            <input type="color" asp-for="HexColor" class="form-control color-box color-l" id="hexColor">
         </div>
 
         <div class="btn-group" role="group">

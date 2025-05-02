@@ -1,0 +1,169 @@
+@model ProductModel
+
+@{
+    Layout = "_Layout";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Cadastrar Produto</h1>
+
+    <form asp-controller="Product" asp-action="Register" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label class="control-label">Imagens do Produto</label>
+            <input type="file" name="ProductImages" id="productImagesInput" class="form-control" multiple accept="image/*"/>
+            <div id="imagePreviewContainer" class="row mt-3">
+                @if (ViewBag.ImagePreviews != null) {
+                    for (var i = 0; i < ((List<string>)ViewBag.ImagePreviews).Count; i++) {
+                        <div class="image-preview-container" draggable="true" data-index="@i">
+                            <img alt="" class="image-preview" src="@((List<string>)ViewBag.ImagePreviews)[i]"/>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+
+        <div class="form-group p-2">
+            <label for="name" class="control-label">Nome do Produto</label>
+            <input asp-for="ProductName" class="form-control" id="name" placeholder="Camisa Regular Em Sarja"/>
+        </div>
+
+        <div class="form-group p-2">
+            <label for="description" class="control-label">Descrição Curta</label>
+            <textarea asp-for="ProductDescription" class="form-control" id="description"
+                      placeholder="Essa camisa regular em sarja oferece um visual clássico e confortável, ideal para diversas ocasiões. O tecido de sarja proporciona um toque macio e durabilidade, enquanto a modelagem regular garante um caimento solto e elegante."></textarea>
+        </div>
+
+        <div class="form-group p-2">
+            <label for="price" class="control-label">Valor</label>
+            <input type="number" min="0" step=".01" asp-for="ProductPrice" class="form-control" id="price"/>
+        </div>
+
+        <div class="form-group">
+            <div class="dropdown p-2">
+                <button class="btn btn-light dropdown-toggle" type="button" id="dropdownGender"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    Selecionar Gênero
+                </button>
+
+                <ul class="dropdown-menu" aria-labelledby="dropdownGender">
+                    @if (ViewBag.Genders != null) {
+                        foreach (var gender in (List<GenderModel>)ViewBag.Genders) {
+                            <li>
+                                <div class="form-check ms-2">
+                                    <input type="radio" class="form-check-input" name="GenderId"
+                                           value="@gender.GenderId"
+                                           asp-for="GenderId"/>
+                                    <label class="form-check-label" asp-for="GenderId">@gender.Gender</label>
+                                </div>
+                            </li>
+                        }
+                    } else {
+                        <li>
+                            <span class="dropdown-item">Nenhum gênero cadastrado</span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="dropdown p-2">
+                <button class="btn btn-light dropdown-toggle" type="button" id="dropdownCategories"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    Selecionar Categorias
+                </button>
+
+                <ul class="dropdown-menu" aria-labelledby="dropdownCategories">
+                    @if (ViewBag.Categories != null) {
+                        foreach (var category in (List<CategoryModel>)ViewBag.Categories) {
+                            <li>
+                                <div class="form-check ms-2">
+                                    <input type="checkbox" class="form-check-input" name="SelectedCategories"
+                                           value="@category.CategoryId"/>
+                                    <label class="form-check-label">@category.Category</label>
+                                </div>
+                            </li>
+                        }
+                    } else {
+                        <li>
+                            <span class="dropdown-item">Nenhuma categoria cadastrada</span>
+                        </li>
+                    }
+                    <li>
+                        <a role="button" class="btn" asp-controller="Category" asp-action="Register">cadastrar</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="dropdown p-2">
+                <button class="btn btn-light dropdown-toggle" type="button" id="dropdownColors"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    Selecionar Cores
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownColors">
+                    @if (ViewBag.Colors != null) {
+                        foreach (var color in (List<ColorModel>)ViewBag.Colors) {
+                            <li>
+                                <div class="form-check ms-2">
+                                    <input type="checkbox" class="form-check-input" name="SelectedColors"
+                                           value="@color.ColorId"/>
+                                    <label class="form-check-label">
+                                        <div class="color-box color-s"
+                                             style="background-color: @color.HexColor"></div>
+                                        @color.Color
+                                    </label>
+                                </div>
+                            </li>
+                        }
+                    } else {
+                        <li>
+                            <span class="dropdown-item">Nenhuma cor cadastrada</span>
+                        </li>
+                    }
+                    <li>
+                        <a role="button" class="btn" asp-controller="Color" asp-action="Register">cadastrar</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="dropdown p-2">
+                <button class="btn btn-light dropdown-toggle" type="button" id="dropdownSizes"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    Selecionar Tamanhos
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownSizes">
+                    @if (ViewBag.Sizes != null) {
+                        foreach (var size in (List<SizeModel>)ViewBag.Sizes) {
+                            <li>
+                                <div class="form-check ms-2">
+                                    <input type="checkbox" class="form-check-input" name="SelectedSizes"
+                                           value="@size.SizeId"/>
+                                    <label class="form-check-label">@size.Size</label>
+                                </div>
+                            </li>
+                        }
+                    } else {
+                        <li>
+                            <span class="dropdown-item">Nenhum tamanho cadastrado</span>
+                        </li>
+                    }
+                    <li>
+                        <a role="button" class="btn" asp-controller="Size" asp-action="Register">cadastrar</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <a role="button" class="btn btn-secondary" asp-controller="Product" asp-action="Index">Cancelar</a>
+            <button type="submit" class="btn btn-primary">Enviar</button>
+        </div>
+    </form>
+</div>
+
+

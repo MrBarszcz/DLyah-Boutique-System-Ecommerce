@@ -17,24 +17,24 @@ public class SizeController : Controller {
         return View(sizes);
     }
     
-    public IActionResult EditSize(int id) {
+    public IActionResult Edit(int id) {
         SizeModel size = _sizeRepository.FindById(id);
         return View(size);
     }
     
-    public IActionResult RegisterSize() {
+    public IActionResult Register() {
         return View();
     }
     
     // POST
     [HttpPost]
-    public IActionResult EditSize(SizeModel s) {
+    public IActionResult Edit(SizeModel s) {
         _sizeRepository.Update(s);
         return RedirectToAction("Index");
     }
     
     [HttpPost]
-    public IActionResult RegisterSize(SizeModel s) {
+    public IActionResult Register(SizeModel s) {
         _sizeRepository.Create(s);
         return RedirectToAction("Index");
     }
