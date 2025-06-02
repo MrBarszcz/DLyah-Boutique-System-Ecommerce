@@ -20,7 +20,7 @@ public class ProductRepository : IProductRepository {
             .ThenInclude(pc => pc.Color)
             .Include(p => p.ProductSizes)
             .ThenInclude(ps => ps.Size)
-            .Include(p => p.ProductImages)
+            .Include(p => p.ProductImages.OrderBy(pi => pi.ImageOrder))
             .Include(pstck => pstck.StockProducts)
             .ToList();
     }
@@ -34,7 +34,7 @@ public class ProductRepository : IProductRepository {
             .ThenInclude(pc => pc.Color)
             .Include(p => p.ProductSizes)
             .ThenInclude(ps => ps.Size)
-            .Include(p => p.ProductImages)
+            .Include(p => p.ProductImages.OrderBy(pi => pi.ImageOrder))
             .Include(p => p.StockProducts) // Inclui os itens de estoque
             .FirstOrDefault(p => p.ProductId == id);
     }
@@ -95,43 +95,59 @@ public class ProductRepository : IProductRepository {
         _context.Products.Add(product);
         _context.SaveChanges();
 
-        if (product.ProductColors != null && product.ProductColors.Any()) {
-            foreach (var colorId in product.ProductColors) {
-                _context.ProductColors.Add(new ProductColorModel {
-                    ProductId = product.ProductId,
-                    ColorId = colorId.ColorId
-                });
-            }
-        }
-
-        if (product.ProductSizes != null && product.ProductSizes.Any()) {
-            foreach (var sizeId in product.ProductSizes) {
-                _context.ProductSizes.Add(new ProductSizeModel {
-                    ProductId = product.ProductId,
-                    SizeId = sizeId.SizeId
-                });
-            }
-        }
-        
-        if (product.ProductCategories != null) {
-            foreach (var categoryId in product.ProductCategories) {
-                _context.ProductCategories.Add(new ProductCategoryModel {
-                    ProductId = product.ProductId,
-                    CategoryId = categoryId.CategoryId
-                });
-            }
-        }
-        
-        if (product.ProductImages != null) {
-            foreach (var pi in product.ProductImages) {
-               
-            }
-        }
-
         return product;
+    }
+
+    public ProductCategoryModel CreateProductCategory(int productId, int categoryId) {
+        ProductCategoryModel productCategory = new ProductCategoryModel {
+            ProductId = productId,
+            CategoryId = categoryId
+        };
+
+        _context.ProductCategories.Add(productCategory);
+
+        return productCategory;
+    }
+
+    public ProductColorModel CreateProductColor(int productId, int colorId) {
+        ProductColorModel productColor = new ProductColorModel {
+            ProductId = productId,
+            ColorId = colorId
+        };
+
+        _context.ProductColors.Add(productColor);
+
+        return productColor;
+    }
+
+    public ProductSizeModel CreateProductSize(int productId, int sizeId) {
+        ProductSizeModel productSize = new ProductSizeModel {
+            ProductId = productId,
+            SizeId = sizeId
+        };
+
+        _context.ProductSizes.Add(productSize);
+
+        return productSize;
+    }
+
+    public ProductImageModel CreateProductImage(ProductImageModel productImage) {
+        _context.ProductImages.Add(productImage);
+
+        return productImage;
+    }
+
+    public StockProductModel CreateStockProduct(StockProductModel stock) {
+        _context.StockProducts.Add(stock);
+
+        return stock;
     }
 
     public ProductModel Kill(ProductModel product) {
         throw new NotImplementedException();
+    }
+
+    public Task<int> SaveChanges() {
+        return _context.SaveChangesAsync();
     }
 }

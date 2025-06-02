@@ -41,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 reader.readAsDataURL(file);
             }
         }
-        event.target.value = ''; // Reset input to allow re-selection
     });
 
     function renderImagePreviews() {
@@ -103,5 +102,91 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial render (if needed)
     if (/* Check if ViewBag.ImagePreviews has initial data */ false) {
         // Adapt based on how initial previews are passed
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const colorCheckboxes = document.querySelectorAll('input[name="SelectedColors"]');
+    const sizeCheckboxes = document.querySelectorAll('input[name="SelectedSizes"]');
+    const stockInputsContainer = document.getElementById('stockInputsContainer');
+
+    function generateStockInputs() {
+        stockInputsContainer.innerHTML = ''; // Limpa os inputs existentes
+
+        const selectedColors = Array.from(colorCheckboxes)
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.value);
+
+        const selectedSizes = Array.from(sizeCheckboxes)
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.value);
+
+        if (selectedColors.length > 0 && selectedSizes.length > 0) {
+            let stockIndex = 0;
+            selectedColors.forEach(colorId => {
+                const colorName = getColorName(colorId);
+                selectedSizes.forEach(sizeId => {
+                    const sizeName = getSizeName(sizeId);
+
+                    const inputGroup = document.createElement('div');
+                    inputGroup.classList.add('form-group', 'row', 'mb-2');
+
+                    const label = document.createElement('label');
+                    label.classList.add('col-sm-4', 'col-form-label');
+                    label.textContent = `Estoque para Cor: ${colorName}, Tamanho: ${sizeName}`;
+
+                    const inputDiv = document.createElement('div');
+                    inputDiv.classList.add('col-sm-8');
+
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.classList.add('form-control');
+                    input.name = `Stock[${stockIndex}].StockQuantity`; // Bind para Stock[i].StockQuantity
+                    input.value = 0;
+
+                    const hiddenColorId = document.createElement('input');
+                    hiddenColorId.type = 'hidden';
+                    hiddenColorId.name = `Stock[${stockIndex}].ColorId`;     // Bind para Stock[i].ColorId
+                    hiddenColorId.value = colorId;
+
+                    const hiddenSizeId = document.createElement('input');
+                    hiddenSizeId.type = 'hidden';
+                    hiddenSizeId.name = `Stock[${stockIndex}].SizeId`;      // Bind para Stock[i].SizeId
+                    hiddenSizeId.value = sizeId;
+
+                    inputDiv.appendChild(input);
+                    inputGroup.appendChild(label);
+                    inputGroup.appendChild(inputDiv);
+                    inputGroup.appendChild(hiddenColorId);
+                    inputGroup.appendChild(hiddenSizeId);
+                    stockInputsContainer.appendChild(inputGroup);
+
+                    stockIndex++;
+                });
+            });
+        }
+    }
+
+    // Adiciona listeners de mudança aos checkboxes de cores e tamanhos
+    colorCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', generateStockInputs);
+    });
+
+    sizeCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', generateStockInputs);
+    });
+
+    // Função auxiliar (você precisará implementar isso para obter os nomes)
+    function getColorName(colorId) {
+        // Pode buscar do ViewBag ou de um array JavaScript preenchido
+        const colorElement = Array.from(document.querySelectorAll('input[name="SelectedColors"][value="' + colorId + '"]'))
+            .find(checkbox => checkbox.checked);
+        return colorElement ? colorElement.nextElementSibling.textContent.trim() : `Cor ID ${colorId}`;
+    }
+
+    function getSizeName(sizeId) {
+        const sizeElement = Array.from(document.querySelectorAll('input[name="SelectedSizes"][value="' + sizeId + '"]'))
+            .find(checkbox => checkbox.checked);
+        return sizeElement ? sizeElement.nextElementSibling.textContent.trim() : `Tamanho ID ${sizeId}`;
     }
 });

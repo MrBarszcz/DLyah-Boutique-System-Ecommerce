@@ -86,7 +86,7 @@ public class BankContext : DbContext {
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<StockProductModel>()
-            .Property(si => si.QuantityStock)
+            .Property(si => si.StockQuantity)
             .HasColumnName("quantity_stock"); // Especifica o nome da coluna de QuantityStock
 
         modelBuilder.Entity<StockProductModel>()

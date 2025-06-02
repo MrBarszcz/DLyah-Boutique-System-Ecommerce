@@ -9,6 +9,12 @@ public interface IProductRepository {
     ProductModel Update(ProductModel product);
 
     ProductModel Create(ProductModel product);
-    
+    ProductCategoryModel CreateProductCategory(int productId, int categoryId);
+    ProductColorModel CreateProductColor(int productId, int colorId);
+    ProductSizeModel CreateProductSize(int productId, int sizeId);
+    ProductImageModel CreateProductImage(ProductImageModel productImage);
+    StockProductModel CreateStockProduct(StockProductModel stock);
     ProductModel Kill(ProductModel product);
+    
+    Task<int> SaveChanges();
 }

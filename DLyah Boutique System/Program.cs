@@ -1,11 +1,17 @@
+using DLyah_Boutique_System;
 using DLyah_Boutique_System.Data;
 using DLyah_Boutique_System.Repository;
+using DLyah_Boutique_System.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
 
 // Add database context, using SQL Server
 builder.Services.AddDbContext<BankContext>(options =>
@@ -17,6 +23,7 @@ builder.Services.AddScoped<ISizeRepository, SizeRepository>();
 builder.Services.AddScoped<IColorRepository, ColorRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IGenderRepository, GenderRepository>();
+builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
 
 var app = builder.Build();

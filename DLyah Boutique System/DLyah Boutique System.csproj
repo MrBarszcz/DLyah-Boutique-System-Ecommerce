@@ -22,4 +22,9 @@
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="wwwroot\images\products\" />
+      <Folder Include="wwwroot\images\users\" />
+    </ItemGroup>
+
 </Project>

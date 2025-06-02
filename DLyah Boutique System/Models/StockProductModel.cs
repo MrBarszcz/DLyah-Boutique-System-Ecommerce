@@ -6,9 +6,9 @@ public class StockProductModel {
     public int ColorId { get; set; }
     public int SizeId { get; set; }
     
-    public int QuantityStock { get; set; }
+    public int StockQuantity { get; set; }
     
-    public virtual ProductModel Product { get; set; } = null!;
-    public virtual ColorModel Color { get; set; } = null!;
-    public virtual SizeModel Size { get; set; } = null!;
+    public virtual ProductModel? Product { get; set; }
+    public virtual ColorModel? Color { get; set; }
+    public virtual SizeModel? Size { get; set; }
 }

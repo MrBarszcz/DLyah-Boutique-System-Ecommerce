@@ -1,4 +1,4 @@
-@model ProductModel
+@model DLyah_Boutique_System.ViewModels.ProductRegisterViewModel
 
 @{
     Layout = "_Layout";
@@ -10,7 +10,7 @@
     <form asp-controller="Product" asp-action="Register" method="post" enctype="multipart/form-data">
         <div class="form-group">
             <label class="control-label">Imagens do Produto</label>
-            <input type="file" name="ProductImages" id="productImagesInput" class="form-control" multiple accept="image/*"/>
+            <input type="file" asp-for="PImages" id="productImagesInput" class="form-control" multiple accept="image/*"/>
             <div id="imagePreviewContainer" class="row mt-3">
                 @if (ViewBag.ImagePreviews != null) {
                     for (var i = 0; i < ((List<string>)ViewBag.ImagePreviews).Count; i++) {
@@ -45,16 +45,14 @@
                         data-bs-toggle="dropdown" aria-expanded="false">
                     Selecionar Gênero
                 </button>
-
+                <span asp-validation-for="GenderId" class="text-danger"></span> @* Validação para o campo Gênero *@
                 <ul class="dropdown-menu" aria-labelledby="dropdownGender">
-                    @if (ViewBag.Genders != null) {
-                        foreach (var gender in (List<GenderModel>)ViewBag.Genders) {
+                    @if (Model.AvailableGenders != null && Model.AvailableGenders.Any()) {
+                        foreach (var gender in Model.AvailableGenders) {
                             <li>
                                 <div class="form-check ms-2">
-                                    <input type="radio" class="form-check-input" name="GenderId"
-                                           value="@gender.GenderId"
-                                           asp-for="GenderId"/>
-                                    <label class="form-check-label" asp-for="GenderId">@gender.Gender</label>
+                                    <input type="radio" class="form-check-input" asp-for="GenderId" value="@gender.GenderId" id="gender_@gender.GenderId"/>
+                                    <label class="form-check-label" for="gender_@gender.GenderId">@gender.Gender</label>
                                 </div>
                             </li>
                         }
@@ -73,22 +71,20 @@
                         data-bs-toggle="dropdown" aria-expanded="false">
                     Selecionar Categorias
                 </button>
-
                 <ul class="dropdown-menu" aria-labelledby="dropdownCategories">
-                    @if (ViewBag.Categories != null) {
-                        foreach (var category in (List<CategoryModel>)ViewBag.Categories) {
+                    @if (Model.AvailableCategories != null && Model.AvailableCategories.Any()) {
+                        foreach (var category in Model.AvailableCategories) {
                             <li>
                                 <div class="form-check ms-2">
                                     <input type="checkbox" class="form-check-input" name="SelectedCategories"
-                                           value="@category.CategoryId"/>
-                                    <label class="form-check-label">@category.Category</label>
+                                           value="@category.CategoryId" id="category_@category.CategoryId"
+                                           @(Model.SelectedCategories != null && Model.SelectedCategories.Contains(category.CategoryId) ? "checked" : "")/>
+                                    <label class="form-check-label" for="category_@category.CategoryId">@category.Category</label>
                                 </div>
                             </li>
                         }
                     } else {
-                        <li>
-                            <span class="dropdown-item">Nenhuma categoria cadastrada</span>
-                        </li>
+                        // ...
                     }
                     <li>
                         <a role="button" class="btn" asp-controller="Category" asp-action="Register">cadastrar</a>
@@ -103,14 +99,19 @@
                         data-bs-toggle="dropdown" aria-expanded="false">
                     Selecionar Cores
                 </button>
+                @* Para exibir erros de validação relacionados à seleção de cores (ex: se for obrigatório selecionar ao menos uma),
+                   você pode ter um [Required] na propriedade SelectedColors da ViewModel,
+                   e o ValidationSummary ou um span customizado pegaria o erro.
+                   Ex: <span asp-validation-for="SelectedColors" class="text-danger"></span> (Pode precisar de ajustes para listas) *@
                 <ul class="dropdown-menu" aria-labelledby="dropdownColors">
-                    @if (ViewBag.Colors != null) {
-                        foreach (var color in (List<ColorModel>)ViewBag.Colors) {
+                    @if (Model.AvailableColors != null && Model.AvailableColors.Any()) {
+                        foreach (var color in Model.AvailableColors) {
                             <li>
                                 <div class="form-check ms-2">
                                     <input type="checkbox" class="form-check-input" name="SelectedColors"
-                                           value="@color.ColorId"/>
-                                    <label class="form-check-label">
+                                           value="@color.ColorId" id="color_@color.ColorId"
+                                           @(Model.SelectedColors != null && Model.SelectedColors.Contains(color.ColorId) ? "checked" : "")/>
+                                    <label class="form-check-label" for="color_@color.ColorId">
                                         <div class="color-box color-s"
                                              style="background-color: @color.HexColor"></div>
                                         @color.Color
@@ -124,7 +125,10 @@
                         </li>
                     }
                     <li>
-                        <a role="button" class="btn" asp-controller="Color" asp-action="Register">cadastrar</a>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li>
+                        <a role="button" class="btn dropdown-item" asp-controller="Color" asp-action="Register">Cadastrar Nova Cor</a>
                     </li>
                 </ul>
             </div>
@@ -136,14 +140,16 @@
                         data-bs-toggle="dropdown" aria-expanded="false">
                     Selecionar Tamanhos
                 </button>
+                @* Validação para SelectedSizes, se necessário *@
                 <ul class="dropdown-menu" aria-labelledby="dropdownSizes">
-                    @if (ViewBag.Sizes != null) {
-                        foreach (var size in (List<SizeModel>)ViewBag.Sizes) {
+                    @if (Model.AvailableSizes != null && Model.AvailableSizes.Any()) {
+                        foreach (var size in Model.AvailableSizes) {
                             <li>
                                 <div class="form-check ms-2">
                                     <input type="checkbox" class="form-check-input" name="SelectedSizes"
-                                           value="@size.SizeId"/>
-                                    <label class="form-check-label">@size.Size</label>
+                                           value="@size.SizeId" id="size_@size.SizeId"
+                                           @(Model.SelectedSizes != null && Model.SelectedSizes.Contains(size.SizeId) ? "checked" : "")/>
+                                    <label class="form-check-label" for="size_@size.SizeId">@size.Size</label>
                                 </div>
                             </li>
                         }
@@ -153,9 +159,17 @@
                         </li>
                     }
                     <li>
-                        <a role="button" class="btn" asp-controller="Size" asp-action="Register">cadastrar</a>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li>
+                        <a role="button" class="btn dropdown-item" asp-controller="Size" asp-action="Register">Cadastrar Novo Tamanho</a>
                     </li>
                 </ul>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div id="stockInputsContainer">
             </div>
         </div>
 

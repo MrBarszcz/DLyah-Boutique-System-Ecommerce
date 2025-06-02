@@ -11,5 +11,7 @@ namespace DLyah_Boutique_System.ViewModels
         public List<SizeModel> Sizes { get; set; }
         public GenderModel Gender { get; set; }
         public List<ProductImageModel> Images { get; set; }
+        
+        public List<StockProductModel> StockProducts { get; set; }
     }
 }
