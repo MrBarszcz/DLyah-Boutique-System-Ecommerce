@@ -73,8 +73,8 @@ public class ProductController : Controller
                     ProductName = viewModel.ProductName!,
                     ProductDescription = viewModel.ProductDescription!,
                     ProductPrice = viewModel.ProductPrice,
-                    GenderId = viewModel.GenderId
-                    // ProductQuantity não está na ViewModel, será default (0) ou precisa ser adicionada.
+                    GenderId = viewModel.GenderId,
+                    ProductQuantity = viewModel.Stock?.Sum(s => s.StockQuantity) ?? 0
                 };
 
                 // Adiciona o produto ao contexto do repositório (sem salvar ainda, se o Create não salva)
