@@ -19,7 +19,7 @@
         <thead>
         <tr>
             <th scope="col">#</th>
-            <th scope="col"></th> @* Image *@
+            <th scope="col" style="width: 70px"></th> @* Image *@
             <th scope="col">Nome</th>
             <th scope="col">Gênero</th>
             <th scope="col">Categorias</th>
@@ -37,117 +37,150 @@
                 <tr>
                     <th scope="row">@product.Product.ProductId</th>
                     <td>
-                        @if (product.Images != null && product.Images.Any()) {
+                        @if (product.Images.Any()) {
                             <img src="@product.Images.First().ProductImagePath" alt="@product.Product.ProductName"
-                                 style="max-width: 50px; max-height: 50px;">
+                                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
                         } else {
-                            <span>Sem imagem</span>
+                            <div
+                                style="width: 50px; height: 50px; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+                                <i class="bi bi-card-image" style="font-size: 1.5rem; color: #ccc;"></i>
+                            </div>
                         }
                     </td>
                     <td>@product.Product.ProductName</td>
                     <td>@product.Gender.Gender</td>
+
+                    @* Categorias *@
                     <td>
-                        @if (product.Categories != null && product.Categories.Any()) {
-                            @if (product.Categories.Count <= 3) { // Display up to 3 categories initially
-                                <ul>
-                                    @foreach (var category in product.Categories) {
-                                        <li>@category.Category</li>
-                                    }
-                                </ul>
-                            } else {
-                                <ul>
-                                    @for (int i = 0; i < 3; i++) {
-                                        <li>@product.Categories[i].Category</li>
-                                    }
-                                </ul>
-                                <a href="javascript:void(0);" class="see-more-categories"
-                                   data-product-id="@product.Product.ProductId"><i class="bi bi-three-dots"></i>
-                                    (@(product.Categories.Count - 3))</a> // Counts how many categories there are excluding the three already displayed
-                                <ul id="categorias-@product.Product.ProductId" style="display: none;">
-                                    @for (int i = 3; i < product.Categories.Count; i++) {
-                                        <li>@product.Categories[i].Category</li>
-                                    }
-                                </ul>
+                        @if (product.Categories.Any()) {
+                            <div>
+                                @foreach (var category in product.Categories.Take(3)) {
+                                    <span class="badge bg-secondary fw-normal">@category.Category</span>
+                                }
+                            </div>
+                            @if (product.Categories.Count > 3) {
+                                <div class="dropdown d-inline-block">
+                                    <button class="btn btn-sm btn-link p-0" type="button" data-bs-toggle="dropdown"
+                                            aria-expanded="false">
+                                        e mais @(product.Categories.Count - 3)...
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        @foreach (var category in product.Categories.Skip(3)) {
+                                            <li><span class="dropdown-item-text">@category.Category</span></li>
+                                        }
+                                    </ul>
+                                </div>
                             }
-                        } else {
-                            <span>Nenhuma</span>
-                        }
+                        } else { <span>-</span> }
                     </td>
+
+                    @* Cores *@
                     <td>
-                        @if (product.Colors != null && product.Colors.Any()) {
-                            @if (product.Colors.Count <= 2) {
-                                <ul>
-                                    @foreach (var color in product.Colors) {
-                                        <li>
-                                            <div class="color-box color-s" style="background-color:@color.HexColor"></div>
+                        @if (product.Colors.Any()) {
+                            <div class="d-flex align-items-center">
+                                @foreach (var color in product.Colors.Take(3)) {
+                                    <div class="color-box me-1" style="background-color:@color.HexColor"
+                                         title="@color.Color"></div>
+                                }
+                                @if (product.Colors.Count > 3) {
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light py-0 px-1" type="button"
+                                                data-bs-toggle="dropdown" aria-expanded="false" title="Ver mais cores">
+                                            <i class="bi bi-three-dots"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            @foreach (var color in product.Colors.Skip(3)) {
+                                                <li class="d-flex align-items-center px-3 py-1">
+                                                    <div class="color-box me-2"
+                                                         style="background-color:@color.HexColor"></div>
+                                                    <span>@color.Color</span>
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                }
+                            </div>
+                        } else { <span>-</span> }
+                    </td>
+
+                    @* Tamanhos *@
+                    <td>
+                        @if (product.Sizes.Any()) {
+                            <div>
+                                @foreach (var size in product.Sizes.Take(3)) {
+                                    <span class="badge bg-light text-dark border">@size.Size</span>
+                                }
+                            </div>
+                            @if (product.Sizes.Count > 3) {
+                                <div class="dropdown d-inline-block">
+                                    <button class="btn btn-sm btn-link p-0" type="button" data-bs-toggle="dropdown"
+                                            aria-expanded="false">
+                                        e mais @(product.Sizes.Count - 3)...
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        @foreach (var size in product.Sizes.Skip(3)) {
+                                            <li><span class="dropdown-item-text">@size.Size</span></li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                        } else { <span>-</span> }
+                    </td>
+
+                    @* Estoque *@
+                    <td>
+                        <strong>@product.Product.ProductQuantity</strong>
+                        @if (product.StockProducts.Any()) {
+                            <div class="dropdown d-inline-block">
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-1 ms-1" type="button"
+                                        data-bs-toggle="dropdown" aria-expanded="false" title="Ver estoque detalhado">
+                                    <i class="bi bi-box-seam"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li class="dropdown-header">Estoque por combinação</li>
+                                    @foreach (var stockItem in product.StockProducts) {
+                                        <li class="d-flex justify-content-between align-items-center px-3 py-1">
+                                        <span>
+                                            <div class="color-box color-s me-2"
+                                                 style="background-color:@stockItem.Color.HexColor"></div>
+                                            @stockItem.Size.Size
+                                        </span>
+                                            <span class="badge bg-primary rounded-pill">@stockItem.StockQuantity</span>
                                         </li>
                                     }
-                                </ul>  
-                            } else {
-                                <ul>
-                                    @for (int i = 0; i < 2; i++) {
-                                        <div class="color-box" style="background-color:@product.Colors[i].HexColor"></div>
-                                    }
                                 </ul>
-                                <a href="javascript:void(0);" class="see-more-colors"
-                                   data-product-id="@product.Product.ProductId">
-                                    <i class="bi bi-three-dots"></i>
-                                    (@(product.Colors.Count - 2))
-                                </a>
-                                <ul id="categorias-@product.Product.ProductId" style="display: none;">
-                                    @for (int i = 2; i < product.Colors.Count; i++) {
-                                        <li>
-                                            <div class="color-box" style="background-color:@product.Colors[i].HexColor"></div>
-                                        </li>
-                                    }
-                                </ul>
-                            }
-                        } else {
-                            <span>Nenhuma</span>
+                            </div>
                         }
                     </td>
+
+                    @* Preço Formatado *@
+                    <td>@product.Product.ProductPrice.ToString("C", new System.Globalization.CultureInfo("pt-BR"))</td>
+
+                    @* Botão "Ver" Funcional *@
                     <td>
-                        @if (product.Sizes != null && product.Sizes.Any()) {
-                            @if (product.Sizes.Count <= 4) {
-                                <ul>
-                                    @foreach (var size in product.Sizes) {
-                                        <li>@size.Size</li>
-                                    }
-                                </ul>    
-                            } else {
-                                <ul>
-                                    @for (int i = 0; i < 4; i++) {
-                                        <li>@product.Sizes[i].Size</li>
-                                    }
-                                </ul>
-                                <a href="javascript:void(0);" class="see-more-sizes"
-                                   data-product-id="@product.Product.ProductId">
-                                    <i class="bi bi-three-dots"></i>
-                                    (@(product.Sizes.Count - 4))
-                                </a>
-                                <ul id="categorias-@product.Product.ProductId" style="display: none;">
-                                    @for (int i = 4; i < product.Sizes.Count; i++) {
-                                        <li>@product.Sizes[i].Size</li>
-                                    }
-                                </ul>
-                            }
-                        } else {
-                            <span>Nenhuma</span>
-                        }
+                        <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Product.ProductId"
+                           class="btn btn-sm btn-outline-secondary" title="Detalhes">
+                            <i class="bi bi-eye"></i>
+                        </a>
                     </td>
-                    <td>@product.Product.ProductQuantity</td>
-                    <td>@product.Product.ProductPrice</td>
-                    <td><i class="bi bi-eye-fill"></i></td>
+
+                    @* Botões Editar/Excluir Corrigidos *@
                     <td>
                         <div class="btn-group" role="group">
-                            <a role="button" class="btn btn-outline-primary" asp-route-id="@product.Product.ProductId"
-                               asp-controller="Product" asp-action="Edit"><i class="bi bi-pencil-fill"></i></a>
-                            <a role="button" class="btn btn-danger btn-delete-product"
-                               color-id="@product.Product.ProductId"><i class="bi bi-trash3"></i></a>
+                            <a role="button" class="btn btn-sm btn-outline-primary"
+                               asp-route-id="@product.Product.ProductId"
+                               asp-controller="Product" asp-action="Edit" title="Editar"><i
+                                    class="bi bi-pencil"></i></a> @* <<< CORRIGIDO AQUI *@
+                            <a role="button" class="btn btn-sm btn-outline-danger btn-delete-product"
+                               data-product-id="@product.Product.ProductId" title="Excluir"><i class="bi bi-trash"></i></a>
                         </div>
                     </td>
                 </tr>
             }
+        } else {
+            <tr>
+                <td colspan="11" class="text-center p-4">Nenhum produto foi cadastrado ainda.</td>
+            </tr>
         }
         </tbody>
     </table>

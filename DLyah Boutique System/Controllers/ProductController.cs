@@ -38,7 +38,40 @@ public class ProductController : Controller
 
     // GET
     public IActionResult Index() {
-        return View();
+        try {
+            // Busca todos os produtos e seus dados relacionados do repositório.
+            var productModels = _productRepository.FindAll();
+
+            // Mapeia a lista de ProductModel para a lista de ProductListViewModel.
+            var productListViewModels = productModels.Select(
+                    product => new ProductListViewModel {
+                        Product = product,
+                        Gender = product.Gender,
+                        Categories = product.ProductCategories
+                            .Select(pc => pc.Category)
+                            .ToList(),
+                        Colors = product.ProductColors
+                            .Select(pc => pc.Color)
+                            .ToList(),
+                        Sizes = product.ProductSizes
+                            .Select(ps => ps.Size)
+                            .ToList(),
+                        Images = product.ProductImages
+                            .OrderBy(pi => pi.ImageOrder)
+                            .ToList(),
+                        StockProducts = product.StockProducts.ToList()
+                    }
+                )
+                .ToList();
+
+            // Envia a lista de ViewModels para a View.
+            return View(productListViewModels);
+        } catch (Exception ex) {
+            _logger.LogError(ex, "Ocorreu um erro ao buscar a lista de produtos.");
+            // Retorna uma view de erro ou a mesma view com uma mensagem de erro
+            TempData["ErrorMessage"] = "Não foi possível carregar a lista de produtos.";
+            return View(new List<ProductListViewModel>()); // Retorna uma lista vazia
+        }
     }
 
     public IActionResult Register() {
@@ -58,13 +91,13 @@ public class ProductController : Controller
         if (viewModel.Stock == null) viewModel.Stock = new List<StockProductModel>();
 
         if (viewModel.PImages == null) viewModel.PImages = new List<IFormFile>();
-        
+
         if (viewModel.SelectedCategories == null) viewModel.SelectedCategories = new List<int>();
-        
+
         if (viewModel.SelectedColors == null) viewModel.SelectedColors = new List<int>();
-        
+
         if (viewModel.SelectedSizes == null) viewModel.SelectedSizes = new List<int>();
-        
+
         bool isAjaxRequest = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
 
         if (ModelState.IsValid) {
@@ -85,7 +118,7 @@ public class ProductController : Controller
                 // 2. Processar e salvar Imagens do Produto
                 if (viewModel.PImages.Any()) {
                     string uploadDir = Path.Combine(_environment.WebRootPath, "images", "products");
-                    
+
                     if (!Directory.Exists(uploadDir)) Directory.CreateDirectory(uploadDir);
 
                     int order = 1;
@@ -98,7 +131,7 @@ public class ProductController : Controller
                             using (var stream = new FileStream(filePath, FileMode.Create)) {
                                 await imageFile.CopyToAsync(stream);
                             }
-                            
+
                             _productRepository.CreateProductImage(
                                 new ProductImageModel {
                                     ProductId = product.ProductId,
@@ -141,7 +174,7 @@ public class ProductController : Controller
                             SizeId = stockInput.SizeId,
                             StockQuantity = stockInput.StockQuantity
                         };
-                        
+
                         _productRepository.CreateStockProduct(stockItem);
                     }
                 }
@@ -169,10 +202,19 @@ public class ProductController : Controller
                 if (isAjaxRequest) {
                     var errors = ModelState.ToDictionary(
                         kvp => kvp.Key,
-                        kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                        kvp => kvp.Value
+                            .Errors
+                            .Select(e => e.ErrorMessage)
+                            .ToArray()
                     );
-                    
-                    return BadRequest(new {sucess = false, errors = errors, message = "Dados Invalidos"});
+
+                    return BadRequest(
+                        new {
+                            sucess = false,
+                            errors = errors,
+                            message = "Dados Invalidos"
+                        }
+                    );
                 }
             }
         }
