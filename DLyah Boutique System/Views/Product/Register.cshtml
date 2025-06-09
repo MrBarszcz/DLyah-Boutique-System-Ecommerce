@@ -7,7 +7,9 @@
 <div class="text-center">
     <h1 class="display-4">Cadastrar Produto</h1>
 
-    <form asp-controller="Product" asp-action="Register" method="post" enctype="multipart/form-data">
+    <form asp-controller="Product" asp-action="Register" method="post" enctype="multipart/form-data" id="productForm">
+        @Html.AntiForgeryToken()
+        
         <div class="form-group">
             <label class="control-label">Imagens do Produto</label>
             <input type="file" asp-for="PImages" id="productImagesInput" class="form-control" multiple accept="image/*"/>

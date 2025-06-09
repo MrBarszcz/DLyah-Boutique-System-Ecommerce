@@ -19,7 +19,7 @@ public class ProductController : Controller
     private readonly IWebHostEnvironment _environment;
     private readonly ILogger<ProductController> _logger;
 
-    private readonly string _pathImage;
+    // private readonly string _pathImage;
 
     public ProductController(
         IProductRepository productRepository, IGenderRepository genderRepository,
@@ -33,7 +33,7 @@ public class ProductController : Controller
         _sizeRepository = sizeRepository;
         _environment = environment;
         _logger = logger;
-        _pathImage = Path.Combine(_environment.WebRootPath, "images", "products");
+        // _pathImage = Path.Combine(_environment.WebRootPath, "images", "products");
     }
 
     // GET
@@ -52,20 +52,22 @@ public class ProductController : Controller
     }
 
     [ HttpPost ]
+    [ ValidateAntiForgeryToken ]
     public async Task<IActionResult> Register(ProductRegisterViewModel viewModel) {
         // Garante que a lista de Stock não seja nula para evitar erros de referência
-        if (viewModel.Stock == null) {
-            viewModel.Stock = new List<StockProductModel>();
-        }
+        if (viewModel.Stock == null) viewModel.Stock = new List<StockProductModel>();
 
-        if (viewModel.PImages == null) {
-            Console.WriteLine("Chegou Nulo");
-            viewModel.PImages = new List<IFormFile>();
-        }
-
+        if (viewModel.PImages == null) viewModel.PImages = new List<IFormFile>();
+        
+        if (viewModel.SelectedCategories == null) viewModel.SelectedCategories = new List<int>();
+        
+        if (viewModel.SelectedColors == null) viewModel.SelectedColors = new List<int>();
+        
+        if (viewModel.SelectedSizes == null) viewModel.SelectedSizes = new List<int>();
+        
+        bool isAjaxRequest = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
 
         if (ModelState.IsValid) {
-            Console.WriteLine("ModelState do ViewModel é válido.");
             try {
                 var product = new ProductModel {
                     ProductName = viewModel.ProductName!,
@@ -79,19 +81,13 @@ public class ProductController : Controller
                 _productRepository.Create(product);
                 // Salva o produto principal para obter o ProductId gerado pelo banco
                 await _productRepository.SaveChanges();
-                Console.WriteLine($"Produto principal criado com ID: {product.ProductId}");
 
                 // 2. Processar e salvar Imagens do Produto
                 if (viewModel.PImages.Any()) {
-                    Console.WriteLine(
-                        $"{viewModel.PImages.Count} imagens recebidas. para o produto ID: {product.ProductId}."
-                    );
                     string uploadDir = Path.Combine(_environment.WebRootPath, "images", "products");
-                    if (!Directory.Exists(uploadDir)) {
-                        Directory.CreateDirectory(uploadDir);
-                        Console.WriteLine($"Diretório de upload criado: {uploadDir}");
-                    }
                     
+                    if (!Directory.Exists(uploadDir)) Directory.CreateDirectory(uploadDir);
+
                     int order = 1;
                     foreach (var imageFile in viewModel.PImages) {
                         if (imageFile.Length > 0) {
@@ -102,9 +98,7 @@ public class ProductController : Controller
                             using (var stream = new FileStream(filePath, FileMode.Create)) {
                                 await imageFile.CopyToAsync(stream);
                             }
-
-                            Console.WriteLine($"Imagem {uniqueFileName} salva em {filePath}");
-
+                            
                             _productRepository.CreateProductImage(
                                 new ProductImageModel {
                                     ProductId = product.ProductId,
@@ -115,8 +109,6 @@ public class ProductController : Controller
                             );
                         }
                     }
-                } else {
-                    Console.WriteLine("Sem Imagens");
                 }
 
                 // 3. Associar Categorias selecionadas
@@ -124,8 +116,6 @@ public class ProductController : Controller
                     foreach (var categoryId in viewModel.SelectedCategories) {
                         _productRepository.CreateProductCategory(product.ProductId, categoryId);
                     }
-
-                    Console.WriteLine($"Categorias associadas ao produto ID: {product.ProductId}.");
                 }
 
                 // 4. Associar Cores selecionadas
@@ -133,8 +123,6 @@ public class ProductController : Controller
                     foreach (var colorId in viewModel.SelectedColors) {
                         _productRepository.CreateProductColor(product.ProductId, colorId);
                     }
-
-                    Console.WriteLine($"Cores associadas ao produto ID: {product.ProductId}.");
                 }
 
                 // 5. Associar Tamanhos selecionados
@@ -142,8 +130,6 @@ public class ProductController : Controller
                     foreach (var sizeId in viewModel.SelectedSizes) {
                         _productRepository.CreateProductSize(product.ProductId, sizeId);
                     }
-
-                    Console.WriteLine($"Tamanhos associados ao produto ID: {product.ProductId}.");
                 }
 
                 // 6. Criar entradas de Estoque
@@ -155,17 +141,13 @@ public class ProductController : Controller
                             SizeId = stockInput.SizeId,
                             StockQuantity = stockInput.StockQuantity
                         };
+                        
                         _productRepository.CreateStockProduct(stockItem);
                     }
-
-                    Console.WriteLine($"Itens de estoque associados ao produto ID: {product.ProductId}.");
                 }
 
                 // Salva todas as entidades relacionadas (imagens, categorias, cores, tamanhos, estoque)
                 await _productRepository.SaveChanges();
-                Console.WriteLine(
-                    $"Todas as entidades relacionadas ao produto ID: {product.ProductId} foram salvas."
-                );
 
                 // TempData["SuccessMessage"] = "Produto cadastrado com sucesso!"; // Opcional: mensagem de sucesso
                 return RedirectToAction(nameof(Index));
@@ -177,12 +159,20 @@ public class ProductController : Controller
                 // Não se esqueça de repopular os dados para os dropdowns/listas se houver um erro aqui
             }
         } else {
-            Console.WriteLine("ModelState do ViewModel NÃO é válido.");
             foreach (var state in ModelState) {
                 if (state.Value.Errors.Any()) {
                     Console.WriteLine(
                         $"Campo: {state.Key}, Erros: {string.Join("; ", state.Value.Errors.Select(e => e.ErrorMessage))}"
                     );
+                }
+
+                if (isAjaxRequest) {
+                    var errors = ModelState.ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                    );
+                    
+                    return BadRequest(new {sucess = false, errors = errors, message = "Dados Invalidos"});
                 }
             }
         }

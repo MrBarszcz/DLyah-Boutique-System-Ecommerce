@@ -1,6 +1,7 @@
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");
 
 html {
+  height: 100%;
   font-size: 14px;
 }
 
@@ -14,15 +15,15 @@ html {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
-}
-
 body {
-  margin-bottom: 60px;
+  min-height: 100%;
+  margin: 0;
   display: flex;
   flex-direction: column;
+}
+
+body > .container {
+  flex-grow: 1;
 }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
@@ -36,6 +37,13 @@ body {
 
 .footer {
   height: 60px;
+  line-height: 60px;
+  flex-shrink: 0;
+  background-color: #57575a;
+  border-top: 1px solid #e5e5e5;
+  color: #6c757d; /* Cor do text-muted do Bootstrap */
+  width: 100%;
+  text-align: center; /* Centraliza o texto do copyright, se desejar */
 }
 
 .color-box {
@@ -57,21 +65,108 @@ body {
   height: 15px;
 }
 
-.image-preview-container {
+/*.image-preview-container {*/
+/*  width: 100px;*/
+/*  height: 100px;*/
+/*  margin-right: 10px;*/
+/*  margin-bottom: 10px;*/
+/*  border: 1px solid #ccc;*/
+/*  cursor: grab;*/
+/*}*/
+
+/*.image-preview {*/
+/*  width: 100%;*/
+/*  height: 100%;*/
+/*  object-fit: cover;*/
+/*}*/
+
+/*.dragging {*/
+/*  opacity: 0.5;*/
+/*}*/
+
+/* --- Estilos para Pré-visualização de Imagens de Produto --- */
+
+/* Container principal que usa Flexbox para alinhar os itens lado a lado e quebrar a linha quando necessário */
+
+#imagePreviewContainer {
+  display: none;
+  flex-wrap: wrap;
+  gap: 15px; /* Espaçamento entre os itens */
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  min-height: 120px; /* Altura mínima para mostrar que é uma área de drop */
+  background-color: #f9f9f9;
+}
+
+/* Container para cada item individual (imagem + nome) */
+.image-preview-item {
+  display: flex;
+  flex-direction: column; /* Organiza a imagem e o nome verticalmente */
+  align-items: center;
+  width: 120px; /* Largura fixa para cada item */
+}
+
+/* Container que envolve a imagem e a sobreposição de remoção */
+.image-preview-item .image-container {
+  position: relative; /* Essencial para posicionar a sobreposição */
   width: 100px;
   height: 100px;
-  margin-right: 10px;
-  margin-bottom: 10px;
   border: 1px solid #ccc;
-  cursor: grab;
+  background-color: #fff;
+  margin-bottom: 5px; /* Espaço entre a imagem e o nome */
 }
 
-.image-preview {
+/* A imagem de pré-visualização */
+.image-preview-item .image-preview {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; /* Garante que a imagem preencha o container sem distorcer */
 }
 
-.dragging {
-  opacity: 0.5;
+/* A sobreposição que aparece no hover */
+.image-preview-item .remove-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* Fundo preto semitransparente */
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 3rem; /* Tamanho do 'X' */
+  font-weight: bold;
+  cursor: pointer;
+  opacity: 0; /* Começa invisível */
+  visibility: hidden;
+  transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+}
+
+/* Efeito de hover: torna a sobreposição visível */
+.image-preview-item .image-container:hover .remove-overlay {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* O ícone 'X' */
+.image-preview-item .remove-icon {
+  line-height: 1; /* Alinhamento vertical do 'X' */
+  user-select: none; /* Impede que o 'X' seja selecionado como texto */
+}
+
+/* Nome do arquivo embaixo da imagem */
+.image-preview-item .image-name {
+  font-size: 0.8rem;
+  color: #555;
+  text-align: center;
+  word-break: break-all; /* Quebra nomes de arquivos muito longos */
+  max-width: 100px;
+}
+
+/* Estilo para o item sendo arrastado (feedback visual) */
+.image-preview-item.dragging {
+  opacity: 0.4;
+  border: 2px dashed #007bff;
 }

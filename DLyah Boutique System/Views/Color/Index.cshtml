@@ -24,7 +24,7 @@
         </tr>
         </thead>
         <tbody>
-            @if (Model != null && Model.Any()) {
+            @if (Model.Any()) {
                 foreach (ColorModel color in Model) {
                     <tr>
                         <th scope="row">@color.ColorId</th>

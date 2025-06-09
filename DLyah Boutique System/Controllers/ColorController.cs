@@ -30,14 +30,14 @@ public class ColorController : Controller {
     [HttpPost]
     public IActionResult Edit(ColorModel c) {
         _colorRepository.Update(c);
-        return RedirectToAction("Color");
+        return RedirectToAction("Index");
     }
     
     [HttpPost]
     public IActionResult Register(ColorModel c) {
         if (ModelState.IsValid) {
             _colorRepository.Create(c);
-            return RedirectToAction("Color");
+            return RedirectToAction("Index");
         }
 
         return View(c);
