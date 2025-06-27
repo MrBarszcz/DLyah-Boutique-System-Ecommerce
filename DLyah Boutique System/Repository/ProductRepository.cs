@@ -1,10 +1,12 @@
 using DLyah_Boutique_System.Data;
 using DLyah_Boutique_System.Models;
+using DLyah_Boutique_System.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace DLyah_Boutique_System.Repository;
 
-public class ProductRepository : IProductRepository {
+public class ProductRepository : IProductRepository
+{
     private readonly BankContext _context;
 
     public ProductRepository(BankContext context) {
@@ -52,8 +54,12 @@ public class ProductRepository : IProductRepository {
         productDb.ProductColors.Clear();
         if (product.ProductColors != null) {
             foreach (var pc in product.ProductColors) {
-                productDb.ProductColors.Add(new ProductColorModel
-                    { ProductId = product.ProductId, ColorId = pc.ColorId });
+                productDb.ProductColors.Add(
+                    new ProductColorModel {
+                        ProductId = product.ProductId,
+                        ColorId = pc.ColorId
+                    }
+                );
             }
         }
 
@@ -61,7 +67,12 @@ public class ProductRepository : IProductRepository {
         productDb.ProductSizes.Clear();
         if (product.ProductSizes != null) {
             foreach (var ps in product.ProductSizes) {
-                productDb.ProductSizes.Add(new ProductSizeModel { ProductId = product.ProductId, SizeId = ps.SizeId });
+                productDb.ProductSizes.Add(
+                    new ProductSizeModel {
+                        ProductId = product.ProductId,
+                        SizeId = ps.SizeId
+                    }
+                );
             }
         }
 
@@ -69,8 +80,12 @@ public class ProductRepository : IProductRepository {
         productDb.ProductCategories.Clear();
         if (product.ProductCategories != null) {
             foreach (var pc in product.ProductCategories) {
-                productDb.ProductCategories.Add(new ProductCategoryModel
-                    { ProductId = product.ProductId, CategoryId = pc.CategoryId });
+                productDb.ProductCategories.Add(
+                    new ProductCategoryModel {
+                        ProductId = product.ProductId,
+                        CategoryId = pc.CategoryId
+                    }
+                );
             }
         }
 
@@ -79,9 +94,13 @@ public class ProductRepository : IProductRepository {
         productDb.ProductImages.Clear();
         if (product.ProductImages != null) {
             foreach (var pi in product.ProductImages) {
-                productDb.ProductImages.Add(new ProductImageModel {
-                    ProductId = product.ProductId, ProductImagePath = pi.ProductImagePath, ImageOrder = pi.ImageOrder
-                });
+                productDb.ProductImages.Add(
+                    new ProductImageModel {
+                        ProductId = product.ProductId,
+                        ProductImagePath = pi.ProductImagePath,
+                        ImageOrder = pi.ImageOrder
+                    }
+                );
             }
         }
 
@@ -145,6 +164,88 @@ public class ProductRepository : IProductRepository {
 
     public ProductModel Kill(ProductModel product) {
         throw new NotImplementedException();
+    }
+
+    public void UpdateProductCategories(int productId, List<int> categoryIds) {
+        // Abordagem "Limpar e Recriar"
+        var existingCategories = _context.ProductCategories.Where(pc => pc.ProductId == productId);
+        _context.ProductCategories.RemoveRange(existingCategories);
+
+        if (categoryIds != null && categoryIds.Any()) {
+            var newCategories = categoryIds.Select(
+                catId => new ProductCategoryModel {
+                    ProductId = productId,
+                    CategoryId = catId
+                }
+            );
+            _context.ProductCategories.AddRange(newCategories);
+        }
+    }
+
+    public void UpdateProductColors(int productId, List<int> colorIds) {
+        var existingColors = _context.ProductColors.Where(pc => pc.ProductId == productId);
+        _context.ProductColors.RemoveRange(existingColors);
+
+        if (colorIds != null && colorIds.Any()) {
+            var newColors = colorIds.Select(
+                colorId => new ProductColorModel {
+                    ProductId = productId,
+                    ColorId = colorId
+                }
+            );
+            _context.ProductColors.AddRange(newColors);
+        }
+    }
+
+    public void UpdateProductSizes(int productId, List<int> sizeIds) {
+        var existingSizes = _context.ProductSizes.Where(ps => ps.ProductId == productId);
+        _context.ProductSizes.RemoveRange(existingSizes);
+
+        if (sizeIds != null && sizeIds.Any()) {
+            var newSizes = sizeIds.Select(
+                sizeId => new ProductSizeModel {
+                    ProductId = productId,
+                    SizeId = sizeId
+                }
+            );
+            _context.ProductSizes.AddRange(newSizes);
+        }
+    }
+
+    public void DeleteImages(List<int> imageIds, string webRootPath) {
+        if (imageIds == null || !imageIds.Any()) return;
+
+        foreach (var imageId in imageIds) {
+            var imageToDelete = _context.ProductImages.Find(imageId);
+            if (imageToDelete != null) {
+                // Deleta o arquivo físico do servidor
+                var fullPath = Path.Combine(webRootPath, imageToDelete.ProductImagePath.TrimStart('/'));
+                if (File.Exists(fullPath)) {
+                    File.Delete(fullPath);
+                }
+
+                // Remove a entidade do banco de dados
+                _context.ProductImages.Remove(imageToDelete);
+            }
+        }
+    }
+
+
+    public void UpdateStock(int productId, List<StockEditViewModel> stockEntries) {
+        var existingStock = _context.StockProducts.Where(s => s.ProductId == productId);
+        _context.StockProducts.RemoveRange(existingStock);
+
+        if (stockEntries != null && stockEntries.Any()) {
+            var newStock = stockEntries.Select(
+                se => new StockProductModel {
+                    ProductId = productId,
+                    ColorId = se.ColorId,
+                    SizeId = se.SizeId,
+                    StockQuantity = se.StockQuantity
+                }
+            );
+            _context.StockProducts.AddRange(newStock);
+        }
     }
 
     public Task<int> SaveChanges() {

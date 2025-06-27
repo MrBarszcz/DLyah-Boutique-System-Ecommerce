@@ -1,4 +1,5 @@
 using DLyah_Boutique_System.Models;
+using DLyah_Boutique_System.ViewModels;
 
 namespace DLyah_Boutique_System.Repository;
 
@@ -15,6 +16,13 @@ public interface IProductRepository {
     ProductImageModel CreateProductImage(ProductImageModel productImage);
     StockProductModel CreateStockProduct(StockProductModel stock);
     ProductModel Kill(ProductModel product);
+    
+    void UpdateProductCategories(int productId, List<int> categoryIds);
+    void UpdateProductColors(int productId, List<int> colorIds);
+    void UpdateProductSizes(int productId, List<int> sizeIds);
+    void DeleteImages(List<int> imageIds, string webRootPath);
+    
+    void UpdateStock(int productId, List<StockEditViewModel> stockEntries);
     
     Task<int> SaveChanges();
 }

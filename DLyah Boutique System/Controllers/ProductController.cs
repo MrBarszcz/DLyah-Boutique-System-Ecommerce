@@ -74,6 +74,7 @@ public class ProductController : Controller
         }
     }
 
+
     public IActionResult Register() {
         var viewModel = new ProductRegisterViewModel {
             AvailableGenders = _genderRepository.FindAll(),
@@ -82,6 +83,156 @@ public class ProductController : Controller
             AvailableSizes = _sizeRepository.FindAll()
         };
         return View(viewModel);
+    }
+
+    // No seu ProductController.cs
+
+// GET: Product/Edit/5
+    public IActionResult Edit(int id) {
+        // Busca o produto no banco, incluindo todos os dados relacionados
+        var product = _productRepository.FindById(id);
+        if (product == null) {
+            return NotFound(); // Retorna erro 404 se o produto não existir
+        }
+
+        // Mapeia os dados do modelo de domínio para a ViewModel de Edição
+        var viewModel = new ProductEditViewModel {
+            ProductId = product.ProductId,
+            ProductName = product.ProductName,
+            ProductDescription = product.ProductDescription,
+            ProductPrice = product.ProductPrice,
+            GenderId = product.GenderId,
+
+            // Pré-seleciona os IDs das categorias, cores e tamanhos atuais
+            SelectedCategories = product.ProductCategories
+                .Select(pc => pc.CategoryId)
+                .ToList(),
+            SelectedColors = product.ProductColors
+                .Select(pc => pc.ColorId)
+                .ToList(),
+            SelectedSizes = product.ProductSizes
+                .Select(ps => ps.SizeId)
+                .ToList(),
+
+            // Carrega as imagens que já existem
+            ExistingImages = product.ProductImages
+                .OrderBy(pi => pi.ImageOrder)
+                .ToList(),
+
+            Stock = product.StockProducts
+                .Select(
+                    s => new StockEditViewModel {
+                        StockId = s.StockId,
+                        ProductId = s.ProductId,
+                        ColorId = s.ColorId,
+                        SizeId = s.SizeId,
+                        StockQuantity = s.StockQuantity,
+                        // Preenche os dados auxiliares que o JS vai usar
+                        ColorName = s.Color?.Color, // Adiciona '?' para segurança
+                        HexColor = s.Color?.HexColor,
+                        SizeName = s.Size?.Size
+                    }
+                )
+                .ToList(),
+
+            // Carrega todas as opções disponíveis para os dropdowns/checkboxes
+            AvailableGenders = _genderRepository.FindAll(),
+            AvailableCategories = _categoryRepository.FindAll(),
+            AvailableColors = _colorRepository.FindAll(),
+            AvailableSizes = _sizeRepository.FindAll()
+        };
+
+        return View(viewModel);
+    }
+
+// POST: Product/Edit/5
+    [ HttpPost ]
+    [ ValidateAntiForgeryToken ]
+    public async Task<IActionResult> Edit(ProductEditViewModel viewModel) {
+        if (viewModel.Stock == null) viewModel.Stock = new List<StockEditViewModel>();
+        if (viewModel.SelectedCategories == null) viewModel.SelectedCategories = new List<int>();
+        if (viewModel.SelectedColors == null) viewModel.SelectedColors = new List<int>();
+        if (viewModel.SelectedSizes == null) viewModel.SelectedSizes = new List<int>();
+        if (viewModel.ImagesToDelete == null) viewModel.ImagesToDelete = new List<int>();
+        if (viewModel.NewImages == null) viewModel.NewImages = new List<IFormFile>();
+        
+        if (!ModelState.IsValid) {
+            // Se o modelo for inválido, recarregue os dados necessários e retorne para a view
+            viewModel.AvailableGenders = _genderRepository.FindAll();
+            viewModel.AvailableCategories = _categoryRepository.FindAll();
+            viewModel.AvailableColors = _colorRepository.FindAll();
+            viewModel.AvailableSizes = _sizeRepository.FindAll();
+            // Recarregar imagens existentes é importante para a view não quebrar
+            viewModel.ExistingImages = _productRepository.FindById(viewModel.ProductId)
+                                           ?.ProductImages
+                                           .ToList()
+                                       ?? new List<ProductImageModel>();
+            return View(viewModel);
+        }
+
+        try {
+            // Busca a entidade original do produto no banco, incluindo as coleções
+            var productToUpdate = _productRepository.FindById(viewModel.ProductId);
+            if (productToUpdate == null) {
+                return NotFound();
+            }
+
+            // Mapeia as propriedades simples da ViewModel para a entidade
+            productToUpdate.ProductName = viewModel.ProductName;
+            productToUpdate.ProductDescription = viewModel.ProductDescription;
+            productToUpdate.ProductPrice = viewModel.ProductPrice;
+            productToUpdate.GenderId = viewModel.GenderId;
+
+            // Atualiza as coleções (Categorias, Cores, Tamanhos) - Abordagem "Limpar e Recriar"
+            // É a forma mais simples e segura de garantir a sincronia
+            _productRepository.UpdateProductCategories(productToUpdate.ProductId, viewModel.SelectedCategories);
+            _productRepository.UpdateProductColors(productToUpdate.ProductId, viewModel.SelectedColors);
+            _productRepository.UpdateProductSizes(productToUpdate.ProductId, viewModel.SelectedSizes);
+
+            // Deleta as imagens que foram marcadas para exclusão
+            if (viewModel.ImagesToDelete.Any()) {
+                _productRepository.DeleteImages(viewModel.ImagesToDelete, _environment.WebRootPath);
+            }
+
+            // Adiciona as novas imagens que foram enviadas
+            if (viewModel.NewImages.Any()) {
+                string uploadDir = Path.Combine(_environment.WebRootPath, "images", "products");
+                if (!Directory.Exists(uploadDir)) Directory.CreateDirectory(uploadDir);
+
+                // Descobre qual a maior ordem de imagem existente para continuar a sequência
+                int lastOrder = productToUpdate.ProductImages.Any() ?
+                    productToUpdate.ProductImages.Max(i => i.ImageOrder ?? 0) : 0;
+                foreach (var imageFile in viewModel.NewImages) {
+                    // ... (lógica de salvar arquivo e criar ProductImageModel, igual ao Register)
+                    string uniqueFileName =
+                        $"{Guid.NewGuid().ToString().Substring(0, 8)}-{Path.GetFileName(imageFile.FileName)}";
+                    string filePath = Path.Combine(uploadDir, uniqueFileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create)) {
+                        await imageFile.CopyToAsync(stream);
+                    }
+
+                    _productRepository.CreateProductImage(
+                        new ProductImageModel {
+                            ProductId = productToUpdate.ProductId,
+                            ProductImagePath = $"/images/products/{uniqueFileName}",
+                            ImageOrder = ++lastOrder
+                        }
+                    );
+                }
+            }
+
+            // Salva todas as alterações no banco de dados
+            await _productRepository.SaveChanges();
+
+            return RedirectToAction(nameof(Index));
+        } catch (Exception ex) {
+            _logger.LogError(ex, "Erro ao atualizar o produto {ProductId}", viewModel.ProductId);
+            ModelState.AddModelError("", "Ocorreu um erro ao salvar as alterações.");
+            // Recarregar os dados necessários para a view
+            viewModel.AvailableGenders = _genderRepository.FindAll();
+            // ... etc
+            return View(viewModel);
+        }
     }
 
     [ HttpPost ]

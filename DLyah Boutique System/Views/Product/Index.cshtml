@@ -32,7 +32,7 @@
         </tr>
         </thead>
         <tbody>
-        @if (Model != null && Model.Any()) {
+        @if (Model.Any()) {
             foreach (ProductListViewModel product in Model) {
                 <tr>
                     <th scope="row">@product.Product.ProductId</th>

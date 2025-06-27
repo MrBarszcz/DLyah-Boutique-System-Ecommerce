@@ -1,0 +1,197 @@
+@using DLyah_Boutique_System.ViewModels
+@model DLyah_Boutique_System.ViewModels.ProductEditViewModel
+
+@{
+    ViewData["Title"] = "Editar Produto";
+    Layout = "_Layout";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Editar Produto: @Model.ProductName</h1>
+
+    @* O formulário agora aponta para a action Edit *@
+    <form asp-controller="Product" asp-action="Edit" method="post" enctype="multipart/form-data" id="productForm">
+        @Html.AntiForgeryToken()
+
+        @* Input oculto para enviar o ID do produto de volta ao controller *@
+        <input type="hidden" asp-for="ProductId"/>
+
+        @* --- GERENCIAMENTO DE IMAGENS EXISTENTES --- *@
+        <div class="mb-4">
+            <h5>Imagens Atuais</h5>
+            @if (Model.ExistingImages.Any()) {
+                <div class="d-flex flex-wrap gap-3">
+                    @foreach (var image in Model.ExistingImages) {
+                        <div class="text-center">
+                            <img src="@image.ProductImagePath" alt="Imagem do produto"
+                                 style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px;"/>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" name="ImagesToDelete"
+                                       value="@image.ProductImageId" id="delete_@image.ProductImageId">
+                                <label class="form-check-label" for="delete_@image.ProductImageId">
+                                    Excluir
+                                </label>
+                            </div>
+                        </div>
+                    }
+                </div>
+            } else {
+                <p>Este produto não possui imagens.</p>
+            }
+        </div>
+
+        <hr/>
+
+        @* --- UPLOAD DE NOVAS IMAGENS --- *@
+        <div class="form-group mb-4">
+            <label class="control-label">Adicionar Novas Imagens</label>
+            @* O name="NewImages" deve corresponder à propriedade na ViewModel *@
+            <input type="file" name="NewImages" id="newImagesInput" class="form-control" multiple accept="image/*"/>
+            
+            <div id="imagePreviewContainer" class="row mt-3">
+                @if (ViewBag.ImagePreviews != null) {
+                    for (var i = 0; i < ((List<string>)ViewBag.ImagePreviews).Count; i++) {
+                        <div class="image-preview-container" draggable="true" data-index="@i">
+                            <img alt="" class="image-preview" src="@((List<string>)ViewBag.ImagePreviews)[i]"/>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        <hr/>
+
+        @* --- CAMPOS DE DADOS DO PRODUTO (NOME, DESCRIÇÃO, PREÇO) --- *@
+        @* Esta parte é praticamente idêntica à do Register.cshtml, usando asp-for *@
+        <div class="form-group p-2">
+            <label for="name" class="control-label">Nome do Produto</label>
+            <input asp-for="ProductName" id="name" class="form-control"/>
+            <span asp-validation-for="ProductName" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group p-2">
+            <label for="description" class="control-label">Descrição Curta</label>
+            <textarea asp-for="ProductDescription" class="form-control" id="description"></textarea>
+        </div>
+        
+        <div class="form-group p-2">
+            <label for="price" class="control-label">Valor</label>
+            <input type="number" min="0" step=".01" asp-for="ProductPrice" class="form-control" id="price"/>
+        </div>
+        
+        
+        
+        <div class="form-group">
+            <div class="dropdown p-2">
+                <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    Selecionar Categorias
+                </button>
+                <ul class="dropdown-menu">
+                    @foreach (var category in Model.AvailableCategories) {
+                        <li>
+                            <div class="form-check ms-2">
+                                <input type="checkbox" class="form-check-input" name="SelectedCategories"
+                                       value="@category.CategoryId"
+                                       id="cat_@category.CategoryId"
+                                       @(Model.SelectedCategories.Contains(category.CategoryId) ? "checked" : "")/>
+                                <label class="form-check-label"
+                                       for="cat_@category.CategoryId">@category.Category</label>
+                            </div>
+                        </li>
+                    }
+                    
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li>
+                        <a role="button" class="btn dropdown-item" asp-controller="Category" asp-action="Register">Cadastrar Nova Categoria</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <div class="dropdown p-2">
+                <button class="btn btn-light dropdown-toggle" type="button" id="dropdownColors"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    Selecionar Cores
+                </button>
+                
+                <ul class="dropdown-menu" aria-labelledby="dropdownColors">
+                    @foreach (var color in Model.AvailableColors) {
+                        <li>
+                            <div class="form-check ms-2">
+                                <input type="checkbox" class="form-check-input" name="SelectedColors"
+                                       value="@color.ColorId" id="color_@color.ColorId"
+                                       @(Model.SelectedColors != null && Model.SelectedColors.Contains(color.ColorId) ? "checked" : "")/>
+                                <label class="form-check-label" for="color_@color.ColorId">
+                                    <div class="color-box color-s"
+                                         style="background-color: @color.HexColor"></div>
+                                    @color.Color
+                                </label>
+                            </div>
+                        </li>
+                    }
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li>
+                        <a role="button" class="btn dropdown-item" asp-controller="Color" asp-action="Register">Cadastrar Nova Cor</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="dropdown p-2">
+                <button class="btn btn-light dropdown-toggle" type="button" id="dropdownSizes"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    Selecionar Tamanhos
+                </button>
+                @* Validação para SelectedSizes, se necessário *@
+                <ul class="dropdown-menu" aria-labelledby="dropdownSizes">
+                    @foreach (var size in Model.AvailableSizes) {
+                        <li>
+                            <div class="form-check ms-2">
+                                <input type="checkbox" class="form-check-input" name="SelectedSizes"
+                                       value="@size.SizeId" id="size_@size.SizeId"
+                                       @(Model.SelectedSizes != null && Model.SelectedSizes.Contains(size.SizeId) ? "checked" : "")/>
+                                <label class="form-check-label" for="size_@size.SizeId">@size.Size</label>
+                            </div>
+                        </li>
+                    }
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li>
+                        <a role="button" class="btn dropdown-item" asp-controller="Size" asp-action="Register">Cadastrar Novo Tamanho</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <div id="stockInputsContainer">
+            </div>
+        </div>
+
+
+        <div class="form-group mt-4">
+            <a role="button" class="btn btn-secondary" asp-action="Index">Cancelar</a>
+            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+        </div>
+    </form>
+    
+    @section Scripts {
+        @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    
+        <script>
+        const initialStockData = @Html.Raw(Json.Serialize(Model.Stock ?? new List<StockEditViewModel>()));
+
+        // ADICIONE ESTA LINHA PARA DEPURAR:
+        console.log("Dados de Estoque Inicial:", initialStockData);
+        </script>
+    
+        @* ... referência ao seu site.js ... *@
+    }
+</div>
