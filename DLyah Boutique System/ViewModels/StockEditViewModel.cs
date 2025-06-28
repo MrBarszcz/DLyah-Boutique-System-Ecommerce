@@ -9,7 +9,7 @@ public class StockEditViewModel
     public int StockQuantity { get; set; }
 
     // Propriedades auxiliares para o JavaScript
-    public string ColorName { get; set; }
-    public string SizeName { get; set; }
-    public string HexColor { get; set; }
+    public string? ColorName { get; set; }
+    public string? SizeName { get; set; }
+    public string? HexColor { get; set; }
 }

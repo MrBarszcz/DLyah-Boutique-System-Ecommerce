@@ -146,93 +146,122 @@ public class ProductController : Controller
     }
 
 // POST: Product/Edit/5
+    // No seu ProductController.cs
+
     [ HttpPost ]
     [ ValidateAntiForgeryToken ]
     public async Task<IActionResult> Edit(ProductEditViewModel viewModel) {
-        if (viewModel.Stock == null) viewModel.Stock = new List<StockEditViewModel>();
+        Console.WriteLine($"---> PROCESSO DE EDIÇÃO INICIADO para o produto ID: {viewModel.ProductId}");
+
+        // Inicializa listas para evitar exceções de nulo
         if (viewModel.SelectedCategories == null) viewModel.SelectedCategories = new List<int>();
         if (viewModel.SelectedColors == null) viewModel.SelectedColors = new List<int>();
         if (viewModel.SelectedSizes == null) viewModel.SelectedSizes = new List<int>();
+        if (viewModel.Stock == null) viewModel.Stock = new List<StockEditViewModel>();
         if (viewModel.ImagesToDelete == null) viewModel.ImagesToDelete = new List<int>();
         if (viewModel.NewImages == null) viewModel.NewImages = new List<IFormFile>();
-        
-        if (!ModelState.IsValid) {
-            // Se o modelo for inválido, recarregue os dados necessários e retorne para a view
-            viewModel.AvailableGenders = _genderRepository.FindAll();
-            viewModel.AvailableCategories = _categoryRepository.FindAll();
-            viewModel.AvailableColors = _colorRepository.FindAll();
-            viewModel.AvailableSizes = _sizeRepository.FindAll();
-            // Recarregar imagens existentes é importante para a view não quebrar
-            viewModel.ExistingImages = _productRepository.FindById(viewModel.ProductId)
-                                           ?.ProductImages
-                                           .ToList()
-                                       ?? new List<ProductImageModel>();
-            return View(viewModel);
-        }
 
-        try {
-            // Busca a entidade original do produto no banco, incluindo as coleções
-            var productToUpdate = _productRepository.FindById(viewModel.ProductId);
-            if (productToUpdate == null) {
-                return NotFound();
-            }
-
-            // Mapeia as propriedades simples da ViewModel para a entidade
-            productToUpdate.ProductName = viewModel.ProductName;
-            productToUpdate.ProductDescription = viewModel.ProductDescription;
-            productToUpdate.ProductPrice = viewModel.ProductPrice;
-            productToUpdate.GenderId = viewModel.GenderId;
-
-            // Atualiza as coleções (Categorias, Cores, Tamanhos) - Abordagem "Limpar e Recriar"
-            // É a forma mais simples e segura de garantir a sincronia
-            _productRepository.UpdateProductCategories(productToUpdate.ProductId, viewModel.SelectedCategories);
-            _productRepository.UpdateProductColors(productToUpdate.ProductId, viewModel.SelectedColors);
-            _productRepository.UpdateProductSizes(productToUpdate.ProductId, viewModel.SelectedSizes);
-
-            // Deleta as imagens que foram marcadas para exclusão
-            if (viewModel.ImagesToDelete.Any()) {
-                _productRepository.DeleteImages(viewModel.ImagesToDelete, _environment.WebRootPath);
-            }
-
-            // Adiciona as novas imagens que foram enviadas
-            if (viewModel.NewImages.Any()) {
-                string uploadDir = Path.Combine(_environment.WebRootPath, "images", "products");
-                if (!Directory.Exists(uploadDir)) Directory.CreateDirectory(uploadDir);
-
-                // Descobre qual a maior ordem de imagem existente para continuar a sequência
-                int lastOrder = productToUpdate.ProductImages.Any() ?
-                    productToUpdate.ProductImages.Max(i => i.ImageOrder ?? 0) : 0;
-                foreach (var imageFile in viewModel.NewImages) {
-                    // ... (lógica de salvar arquivo e criar ProductImageModel, igual ao Register)
-                    string uniqueFileName =
-                        $"{Guid.NewGuid().ToString().Substring(0, 8)}-{Path.GetFileName(imageFile.FileName)}";
-                    string filePath = Path.Combine(uploadDir, uniqueFileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create)) {
-                        await imageFile.CopyToAsync(stream);
-                    }
-
-                    _productRepository.CreateProductImage(
-                        new ProductImageModel {
-                            ProductId = productToUpdate.ProductId,
-                            ProductImagePath = $"/images/products/{uniqueFileName}",
-                            ImageOrder = ++lastOrder
-                        }
-                    );
+        if (ModelState.IsValid) {
+            Console.WriteLine("-> ModelState é válido. Iniciando o salvamento...");
+            try {
+                var productToUpdate = _productRepository.FindById(viewModel.ProductId);
+                if (productToUpdate == null) {
+                    Console.WriteLine($"ERRO: Produto com ID {viewModel.ProductId} não encontrado.");
+                    return NotFound();
                 }
+
+                // 1. Atualiza as propriedades simples
+                productToUpdate.ProductName = viewModel.ProductName;
+                productToUpdate.ProductDescription = viewModel.ProductDescription;
+                productToUpdate.ProductPrice = viewModel.ProductPrice;
+                productToUpdate.GenderId = viewModel.GenderId;
+
+                // 2. Recalcula a quantidade total do estoque
+                productToUpdate.ProductQuantity = viewModel.Stock.Sum(s => s.StockQuantity);
+                Console.WriteLine($"-> Quantidade total de estoque calculada: {productToUpdate.ProductQuantity}");
+
+                // 3. Atualiza as coleções
+                _productRepository.UpdateProductCategories(productToUpdate.ProductId, viewModel.SelectedCategories);
+                _productRepository.UpdateProductColors(productToUpdate.ProductId, viewModel.SelectedColors);
+                _productRepository.UpdateProductSizes(productToUpdate.ProductId, viewModel.SelectedSizes);
+                _productRepository.UpdateStock(productToUpdate.ProductId, viewModel.Stock);
+                Console.WriteLine("-> Coleções (Categorias, Cores, Tamanhos, Estoque) preparadas para atualização.");
+
+                // 4. Gerencia as imagens
+                if (viewModel.ImagesToDelete.Any()) {
+                    Console.WriteLine($"-> Deletando {viewModel.ImagesToDelete.Count} imagem(ns).");
+                    _productRepository.DeleteImages(viewModel.ImagesToDelete, _environment.WebRootPath);
+                }
+
+                if (viewModel.NewImages.Any()) {
+                    Console.WriteLine($"-> Adicionando {viewModel.NewImages.Count} nova(s) imagem(ns).");
+                    string uploadDir = Path.Combine(_environment.WebRootPath, "images", "products");
+                    if (!Directory.Exists(uploadDir)) Directory.CreateDirectory(uploadDir);
+
+                    int lastOrder = productToUpdate.ProductImages.Any() ?
+                        productToUpdate.ProductImages.Max(i => i.ImageOrder ?? 0) : 0;
+                    foreach (var imageFile in viewModel.NewImages) {
+                        if (imageFile.Length > 0) {
+                            string uniqueFileName =
+                                $"{Guid.NewGuid().ToString().Substring(0, 8)}-{Path.GetFileName(imageFile.FileName)}";
+                            string filePath = Path.Combine(uploadDir, uniqueFileName);
+                            using (var stream = new FileStream(filePath, FileMode.Create)) {
+                                await imageFile.CopyToAsync(stream);
+                            }
+
+                            _productRepository.CreateProductImage(
+                                new ProductImageModel {
+                                    ProductId = productToUpdate.ProductId,
+                                    ProductImagePath = $"/images/products/{uniqueFileName}",
+                                    ImageOrder = ++lastOrder
+                                }
+                            );
+                        }
+                    }
+                }
+
+                // 5. Salva todas as alterações no banco de dados
+                Console.WriteLine("-> Chamando SaveChanges() para persistir tudo no banco de dados...");
+                await _productRepository.SaveChanges();
+                Console.WriteLine($"SUCESSO: Produto ID {productToUpdate.ProductId} atualizado no banco.");
+
+                TempData["SuccessMessage"] = "Produto atualizado com sucesso!";
+                // Retorna uma resposta de sucesso para o AJAX
+                return Ok(
+                    new {
+                        success = true,
+                        redirectToUrl = Url.Action(nameof(Index))
+                    }
+                );
+            } catch (Exception ex) {
+                Console.WriteLine($"--- ERRO CATCH: Ocorreu uma exceção ao salvar o produto {viewModel.ProductId} ---");
+                Console.WriteLine(ex.ToString()); // Imprime a exceção completa no console
+                return StatusCode(
+                    500,
+                    new {
+                        success = false,
+                        message = "Ocorreu um erro inesperado no servidor. Veja o console da aplicação para detalhes."
+                    }
+                );
             }
-
-            // Salva todas as alterações no banco de dados
-            await _productRepository.SaveChanges();
-
-            return RedirectToAction(nameof(Index));
-        } catch (Exception ex) {
-            _logger.LogError(ex, "Erro ao atualizar o produto {ProductId}", viewModel.ProductId);
-            ModelState.AddModelError("", "Ocorreu um erro ao salvar as alterações.");
-            // Recarregar os dados necessários para a view
-            viewModel.AvailableGenders = _genderRepository.FindAll();
-            // ... etc
-            return View(viewModel);
         }
+
+        // Se o ModelState for inválido
+        Console.WriteLine("AVISO: ModelState é inválido. Retornando erros de validação.");
+        var errors = ModelState.ToDictionary(
+            kvp => kvp.Key,
+            kvp => kvp.Value
+                .Errors
+                .Select(e => e.ErrorMessage)
+                .ToArray()
+        );
+        // Retorna os erros de validação para o AJAX
+        return BadRequest(
+            new {
+                success = false,
+                errors = errors
+            }
+        );
     }
 
     [ HttpPost ]

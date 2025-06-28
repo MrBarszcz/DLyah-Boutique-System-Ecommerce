@@ -47,7 +47,7 @@
             <label class="control-label">Adicionar Novas Imagens</label>
             @* O name="NewImages" deve corresponder à propriedade na ViewModel *@
             <input type="file" name="NewImages" id="newImagesInput" class="form-control" multiple accept="image/*"/>
-            
+
             <div id="imagePreviewContainer" class="row mt-3">
                 @if (ViewBag.ImagePreviews != null) {
                     for (var i = 0; i < ((List<string>)ViewBag.ImagePreviews).Count; i++) {
@@ -61,26 +61,49 @@
 
         <hr/>
 
-        @* --- CAMPOS DE DADOS DO PRODUTO (NOME, DESCRIÇÃO, PREÇO) --- *@
-        @* Esta parte é praticamente idêntica à do Register.cshtml, usando asp-for *@
+
         <div class="form-group p-2">
             <label for="name" class="control-label">Nome do Produto</label>
             <input asp-for="ProductName" id="name" class="form-control"/>
             <span asp-validation-for="ProductName" class="text-danger"></span>
         </div>
-        
+
         <div class="form-group p-2">
             <label for="description" class="control-label">Descrição Curta</label>
             <textarea asp-for="ProductDescription" class="form-control" id="description"></textarea>
         </div>
-        
+
         <div class="form-group p-2">
             <label for="price" class="control-label">Valor</label>
             <input type="number" min="0" step=".01" asp-for="ProductPrice" class="form-control" id="price"/>
         </div>
-        
-        
-        
+
+        <div class="form-group">
+            <div class="dropdown p-2">
+                <button class="btn btn-light dropdown-toggle" type="button" id="dropdownGender"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    Selecionar Gênero
+                </button>
+                <span asp-validation-for="GenderId" class="text-danger"></span> @* Validação para o campo Gênero *@
+                <ul class="dropdown-menu" aria-labelledby="dropdownGender">
+                    @if (Model.AvailableGenders != null && Model.AvailableGenders.Any()) {
+                        foreach (var gender in Model.AvailableGenders) {
+                            <li>
+                                <div class="form-check ms-2">
+                                    <input class="form-check-input" type="radio" asp-for="GenderId" value="@gender.GenderId" id="gender_@gender.GenderId" />
+                                    <label class="form-check-label" for="gender_@gender.GenderId">@gender.Gender</label>
+                                </div>
+                            </li>
+                        }
+                    } else {
+                        <li>
+                            <span class="dropdown-item">Nenhum gênero cadastrado</span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+
         <div class="form-group">
             <div class="dropdown p-2">
                 <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -99,24 +122,25 @@
                             </div>
                         </li>
                     }
-                    
+
                     <li>
                         <hr class="dropdown-divider">
                     </li>
                     <li>
-                        <a role="button" class="btn dropdown-item" asp-controller="Category" asp-action="Register">Cadastrar Nova Categoria</a>
+                        <a role="button" class="btn dropdown-item" asp-controller="Category" asp-action="Register">Cadastrar
+                            Nova Categoria</a>
                     </li>
                 </ul>
             </div>
         </div>
-        
+
         <div class="form-group">
             <div class="dropdown p-2">
                 <button class="btn btn-light dropdown-toggle" type="button" id="dropdownColors"
                         data-bs-toggle="dropdown" aria-expanded="false">
                     Selecionar Cores
                 </button>
-                
+
                 <ul class="dropdown-menu" aria-labelledby="dropdownColors">
                     @foreach (var color in Model.AvailableColors) {
                         <li>
@@ -136,7 +160,8 @@
                         <hr class="dropdown-divider">
                     </li>
                     <li>
-                        <a role="button" class="btn dropdown-item" asp-controller="Color" asp-action="Register">Cadastrar Nova Cor</a>
+                        <a role="button" class="btn dropdown-item" asp-controller="Color" asp-action="Register">Cadastrar
+                            Nova Cor</a>
                     </li>
                 </ul>
             </div>
@@ -164,12 +189,13 @@
                         <hr class="dropdown-divider">
                     </li>
                     <li>
-                        <a role="button" class="btn dropdown-item" asp-controller="Size" asp-action="Register">Cadastrar Novo Tamanho</a>
+                        <a role="button" class="btn dropdown-item" asp-controller="Size" asp-action="Register">Cadastrar
+                            Novo Tamanho</a>
                     </li>
                 </ul>
             </div>
         </div>
-        
+
         <div class="form-group">
             <div id="stockInputsContainer">
             </div>
@@ -181,17 +207,17 @@
             <button type="submit" class="btn btn-primary">Salvar Alterações</button>
         </div>
     </form>
-    
+
     @section Scripts {
         @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
-    
-        <script>
-        const initialStockData = @Html.Raw(Json.Serialize(Model.Stock ?? new List<StockEditViewModel>()));
 
-        // ADICIONE ESTA LINHA PARA DEPURAR:
-        console.log("Dados de Estoque Inicial:", initialStockData);
+        <script>
+            const initialStockData = @Html.Raw(Json.Serialize(Model.Stock ?? new List<StockEditViewModel>()));
+
+            // ADICIONE ESTA LINHA PARA DEPURAR:
+            console.log("Dados de Estoque Inicial:", initialStockData);
         </script>
-    
+
         @* ... referência ao seu site.js ... *@
     }
 </div>
