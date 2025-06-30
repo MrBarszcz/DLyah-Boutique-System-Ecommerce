@@ -1,0 +1,35 @@
+@* O model aqui é a lista que a sua classe BannerViewComponent.cs envia *@
+@model List<BannerPlacementModel>
+
+@if (Model.Any()) {
+    // Usa um ID único para cada carrossel para evitar conflitos se houver mais de um na mesma página
+    var carouselId = $"bannerCarousel_{Model.First().BannerPlacementId}";
+
+    <div id="@carouselId" class="carousel slide mb-4" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            @foreach (var (placement, index) in Model.Select((value, i) => (value, i))) {
+                <div class="carousel-item @(index == 0 ? "active" : "")">
+                    <a href="@placement.Banner.LinkUrl">
+                        <img src="@placement.Banner.ImageUrl" class="d-block w-100" alt="@placement.Banner.Title">
+                    </a>
+                    <div class="carousel-caption d-none d-md-block">
+                        <h5>@placement.Banner.Title</h5>
+                        <p>@placement.Banner.Description</p>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @* Só mostra os botões de controle se houver mais de uma imagem *@
+        @if (Model.Count > 1) {
+            <button class="carousel-control-prev" type="button" data-bs-target="#@carouselId" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Anterior</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#@carouselId" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Próxima</span>
+            </button>
+        }
+    </div>
+}

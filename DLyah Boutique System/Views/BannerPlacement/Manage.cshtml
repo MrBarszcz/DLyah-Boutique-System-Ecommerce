@@ -1,0 +1,113 @@
+@model DLyah_Boutique_System.ViewModels.BannerPlacementViewModel
+
+@{
+    ViewData["Title"] = $"Gerenciar Banners: {Model.PageName}";
+    Layout = "_Layout";
+}
+
+@* Título dinâmico que mostra qual página está sendo gerenciada *@
+<h1>Gerenciar Banners para: <span class="text-primary">@Model.PageName</span></h1>
+<p class="text-muted">Adicione, remova e futuramente reordene os banners que aparecem nesta página específica.</p>
+<a asp-action="Create" class="btn btn-sm btn-outline-secondary mb-3">
+    <i class="bi bi-arrow-left"></i> Voltar para a seleção de página
+</a>
+
+
+@if (TempData["SuccessMessage"] != null) {
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row mt-2 g-5">
+
+    @* --- COLUNA DA ESQUERDA: BANNERS ATUAIS NA PÁGINA --- *@
+    <div class="col-md-7">
+        <h3>Banners Atuais na Página (@Model.CurrentPlacements.Count)</h3>
+        <p class="small text-muted">A ordem de exibição define qual banner aparece primeiro no carrossel.</p>
+        <ul class="list-group">
+            @if (Model.CurrentPlacements.Any()) {
+                @foreach (var placement in Model.CurrentPlacements) {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-dark me-3 p-2">#@placement.DisplayOrder</span>
+                            <img src="@placement.Banner.ImageUrl" height="40" class="me-3 rounded shadow-sm"/>
+                            <div>
+                                <strong>@placement.Banner.Title</strong><br/>
+                                <small class="text-muted">Posição: @placement.Position</small>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center">
+                             <span class="badge bg-@(placement.IsActive ? "success" : "secondary") me-3">
+                                @(placement.IsActive ? "Ativo" : "Inativo")
+                            </span>
+                            @* Mini-formulário para remover este posicionamento específico *@
+                            <form asp-action="RemovePlacement" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="placementId" value="@placement.BannerPlacementId"/>
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        title="Remover desta página">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </li>
+                }
+            } else {
+                <li class="list-group-item text-center p-4">
+                    <p class="mb-1">Nenhum banner posicionado nesta página ainda.</p>
+                    <small class="text-muted">Use o formulário ao lado para adicionar o primeiro.</small>
+                </li>
+            }
+        </ul>
+    </div>
+
+    @* --- COLUNA DA DIREITA: ADICIONAR NOVO BANNER À PÁGINA --- *@
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header fw-bold">
+                Adicionar Banner a "@Model.PageName"
+            </div>
+            <div class="card-body">
+                @if (Model.AvailableBanners.Any()) {
+                    <form asp-action="AddPlacement" method="post">
+                        @Html.AntiForgeryToken()
+                        @* Campo oculto para enviar o nome da página que estamos editando *@
+                        <input type="hidden" name="PageName" value="@Model.PageName"/>
+
+                        <div class="mb-3">
+                            <label for="BannerIdToAdd" class="form-label">1. Escolha um banner do seu catálogo:</label>
+                            <select name="BannerIdToAdd" class="form-select"
+                                    asp-items="@(new SelectList(Model.AvailableBanners, "BannerId", "Title"))">
+                                <option value="">-- Selecione um banner --</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="PositionToAdd" class="form-label">2. Escolha a posição na página:</label>
+                            <select name="PositionToAdd" asp-for="PositionToAdd" asp-items="Model.AvailablePositions"
+                                    class="form-select">
+                                <option value="">-- Selecione uma posição --</option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Adicionar à
+                                Página
+                            </button>
+                        </div>
+                    </form>
+                } else {
+                    <p class="text-center text-muted">Todos os banners ativos já estão sendo usados nesta página ou não
+                        há banners disponíveis.</p>
+                    <div class="text-center">
+                        <a asp-controller="Banner" asp-action="Create" class="btn btn-secondary btn-sm">Criar um novo
+                            banner no catálogo</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

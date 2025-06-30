@@ -74,6 +74,40 @@ public class ProductController : Controller
         }
     }
 
+    public IActionResult Details(int id) {
+        var product = _productRepository.FindById(id);
+
+        if (product == null) {
+            return NotFound();
+        }
+
+        var stockData = product.StockProducts
+            .ToDictionary(
+                key => $"{key.ColorId}-{key.SizeId}",
+                value => value.StockQuantity
+            );
+
+        var viewModel = new ProductDetailViewModel {
+            Product = product,
+            Gender = product.Gender,
+            Images = product.ProductImages
+                .OrderBy(i => i.ImageOrder)
+                .ToList(),
+            Categories = product.ProductCategories
+                .Select(pc => pc.Category)
+                .ToList(),
+            AvailableColors = product.ProductColors
+                .Select(pc => pc.Color)
+                .ToList(),
+            AvailableSizes = product.ProductSizes
+                .Select(ps => ps.Size)
+                .ToList(),
+            StockPerCombination = stockData
+        };
+
+        return View(viewModel);
+    }
+
 
     public IActionResult Register() {
         var viewModel = new ProductRegisterViewModel {
@@ -144,10 +178,7 @@ public class ProductController : Controller
 
         return View(viewModel);
     }
-
-// POST: Product/Edit/5
-    // No seu ProductController.cs
-
+    
     [ HttpPost ]
     [ ValidateAntiForgeryToken ]
     public async Task<IActionResult> Edit(ProductEditViewModel viewModel) {

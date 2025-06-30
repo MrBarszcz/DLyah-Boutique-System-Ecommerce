@@ -1,0 +1,100 @@
+@model IEnumerable<BannerModel>
+
+@{
+    ViewBag.Title = "Gerenciar Banners";
+    Layout = "_Layout";
+}
+
+<div class="text-center">
+    <form id="antiForgeryForm" method="post" class="d-none">
+        @Html.AntiForgeryToken()
+    </form>
+    
+    <div class="text-end">
+        <a role="button" class="btn btn-primary" asp-controller="Banner" asp-action="Register">
+            <i
+                class="bi bi-send-plus"></i></a>
+    </div>
+
+    <h1 class="display-4">Gerenciar Banners</h1>
+
+    <br>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col" style="width: 70px"></th> @* Image *@
+            <th scope="col">Titulo</th>
+            <th scope="col">Status</th>
+            <th scope="col"></th> @* View Button *@
+            <th scope="col"></th> @* Edit Button and Remove Button*@
+        </tr>
+        </thead>
+        <tbody>
+        @if (Model.Any()) {
+            foreach (BannerModel banner in Model) {
+                <tr>
+                    <td>
+                        <img src="@banner.ImageUrl" alt="@banner.Title" style="max-width: 200px; max-height: 50px; object-fit: cover;"/>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(b => banner.Title)
+                    </td>
+                    <td>
+                        @(banner.IsActive ? "Sim" : "Não")
+                    </td>
+
+                    <td>
+                        <a asp-controller="Banner" asp-action="Details" asp-route-id="@banner.BannerId"
+                           class="btn btn-sm btn-outline-secondary" title="Detalhes">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </td>
+
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a role="button" class="btn btn-sm btn-outline-primary"
+                               asp-route-id="@banner.BannerId"
+                               asp-controller="Banner" asp-action="Edit" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger btn-delete-banner"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#confirmDeleteModal"
+                                    data-banner-id="@banner.BannerId">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        } else {
+            <tr>
+                <td colspan="5" class="text-center p-4">Nenhum Banner foi cadastrado ainda.</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Você tem certeza que quer excluir este Banner?</p>
+                    <p class="text-danger">Esta ação não poderá ser desfeita.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    @* Este botão terá o ID do item a ser excluído adicionado via JavaScript *@
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

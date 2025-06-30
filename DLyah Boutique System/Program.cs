@@ -17,6 +17,10 @@ builder.Logging.AddDebug();
 builder.Services.AddDbContext<BankContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Database")));
 
+builder.Services.AddDbContext<IdentityOnlyDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
 // Add repository services
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>(); // Every time it is called, call the CategoryRepository
 builder.Services.AddScoped<ISizeRepository, SizeRepository>();
@@ -24,6 +28,9 @@ builder.Services.AddScoped<IColorRepository, ColorRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IGenderRepository, GenderRepository>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+builder.Services.AddScoped<IBannerRepository, BannerRepository>();
+builder.Services.AddScoped<IBannerPlacementRepository, BannerPlacementRepository>();
+builder.Services.AddScoped<IBannerSlotService, BannerSlotService>();
 
 
 var app = builder.Build();

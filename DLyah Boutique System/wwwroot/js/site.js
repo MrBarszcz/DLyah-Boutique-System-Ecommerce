@@ -5,11 +5,135 @@ $(document).ready(function () {
         console.log("Abrindo modal de exclusão para a categoria ID:", categoryId);
         $('#modalDeleteCategory').modal('show');
     });
+    
+    var bannerIdToDelete; // Variável para guardar o ID
+
+    // Quando o modal estiver prestes a ser exibido...
+    $('#confirmDeleteModal').on('show.bs.modal', function (event) {
+        // Pega o botão que acionou o modal
+        var button = $(event.relatedTarget);
+
+        // Extrai o ID do banner do atributo data-banner-id
+        bannerIdToDelete = button.data('banner-id');
+    });
+
+    $('#confirmDeleteBtn').on('click', function () {
+        // Pega o token AntiForgery do formulário (se houver um no seu _Layout ou na página)
+        var token = $('input[name="__RequestVerificationToken"]').val();
+
+        $.ajax({
+            url: '/Banner/Delete/' + bannerIdToDelete, // Monta a URL para a action de exclusão
+            type: 'POST',
+            headers: {
+                // Envia o token de verificação no cabeçalho da requisição
+                'RequestVerificationToken': token
+            },
+            success: function (result) {
+                // Se a exclusão no servidor for bem-sucedida
+                console.log(result.message);
+
+                // Remove a linha da tabela da tela sem precisar recarregar a página
+                $('button[data-banner-id="' + bannerIdToDelete + '"]').closest('tr').fadeOut(500, function() {
+                    $(this).remove();
+                });
+
+                // Fecha o modal
+                $('#confirmDeleteModal').modal('hide');
+
+                // Opcional: Exibir uma notificação de sucesso (toast)
+                // Ex: showSuccessToast("Banner excluído com sucesso!");
+            },
+            error: function (xhr, status, error) {
+                // Se ocorrer um erro no servidor
+                console.error("Erro ao excluir o banner:", error);
+                alert("Ocorreu um erro ao tentar excluir o banner.");
+                $('#confirmDeleteModal').modal('hide');
+            }
+        });
+    });
 
     // Impede que o menu dropdown feche ao clicar dentro dele
     $('.dropdown-menu').on('click', function (e) {
         e.stopPropagation();
     });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- Lógica da Página de Detalhes do Produto ---
+
+    const mainProductImage = document.getElementById('mainProductImage');
+
+    // VERIFICAÇÃO: Se este elemento não existe, não estamos na página de detalhes.
+    // O script para aqui para não dar erro em outras páginas.
+    if (!mainProductImage) {
+        return;
+    }
+
+    // Se estamos na página de detalhes, seleciona os outros elementos
+    const thumbnailList = document.getElementById('thumbnailList');
+    const colorSelector = document.getElementById('colorSelector');
+    const sizeSelector = document.getElementById('sizeSelector');
+    const stockInfoDiv = document.getElementById('stockInfo');
+    const addToCartBtn = document.getElementById('addToCartBtn');
+    const buyNowBtn = document.getElementById('buyNowBtn');
+
+    let selectedColorId = null;
+    let selectedSizeId = null;
+
+    // Função para trocar a imagem principal ao clicar na miniatura
+    window.changeMainImage = function(thumbnailElement, imagePath) {
+        mainProductImage.src = imagePath;
+        thumbnailList.querySelectorAll('.thumbnail-item').forEach(item => item.classList.remove('active'));
+        thumbnailElement.classList.add('active');
+    }
+
+    // Função para registrar a seleção de uma variante (cor ou tamanho)
+    window.selectVariant = function(element, type) {
+        const selectorId = `#${type}Selector`;
+        const optionClass = `.${type}-option`;
+
+        document.querySelectorAll(`${selectorId} ${optionClass}`).forEach(el => el.classList.remove('selected', 'active'));
+        element.classList.add('selected', 'active');
+
+        if (type === 'color') {
+            selectedColorId = element.dataset.colorId;
+            document.getElementById('selectedColorName').textContent = `(${element.dataset.colorName})`;
+        } else if (type === 'size') {
+            selectedSizeId = element.dataset.sizeId;
+            document.getElementById('selectedSizeName').textContent = `(${element.dataset.sizeName})`;
+        }
+
+        checkStock();
+    }
+
+    // Função para verificar e exibir o estoque
+    function checkStock() {
+        // Só continua se ambos, cor e tamanho, estiverem selecionados
+        if (selectedColorId && selectedSizeId) {
+            const stockKey = `${selectedColorId}-${selectedSizeId}`;
+
+            // A variável 'stockData' foi definida no Details.cshtml
+            const quantity = stockData[stockKey];
+
+            if (quantity !== undefined && quantity > 0) {
+                stockInfoDiv.innerHTML = `<span class="text-success fw-bold">Em estoque (${quantity} disponíveis)</span>`;
+                addToCartBtn.disabled = false;
+                buyNowBtn.disabled = false;
+            } else {
+                stockInfoDiv.innerHTML = `<span class="text-danger">Indisponível</span>`;
+                addToCartBtn.disabled = true;
+                buyNowBtn.disabled = true;
+            }
+        } else {
+            stockInfoDiv.innerHTML = 'Selecione cor e tamanho';
+            addToCartBtn.disabled = true;
+            buyNowBtn.disabled = true;
+        }
+    }
+
+    // Executa a verificação de estoque uma vez no carregamento da página, caso algum item já venha selecionado
+    checkStock();
 });
 
 

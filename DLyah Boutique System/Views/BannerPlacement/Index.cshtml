@@ -1,0 +1,39 @@
+@model IEnumerable<BannerPlacementModel>
+@{ ViewData["Title"] = "Posicionamentos de Banner"; }
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Posicionamentos de Banner</h1>
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Criar Novo Posicionamento</a>
+</div>
+<p>Esta é uma lista de todos os banners e onde eles estão configurados para aparecer no site.</p>
+
+<table class="table table-hover">
+    <thead class="table-light">
+    <tr>
+        <th>Página</th>
+        <th>Posição</th>
+        <th>Banner</th>
+        <th>Ordem</th>
+        <th>Status</th>
+        <th>Ações</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model) {
+        <tr>
+            <td>@item.PageName</td>
+            <td>@item.Position</td>
+            <td><img src="@item.Banner.ImageUrl" height="25" class="me-2 rounded"/> @item.Banner.Title</td>
+            <td>@item.DisplayOrder</td>
+            <td>
+                <span class="badge bg-@(item.IsActive ? "success" : "secondary")">
+                    @(item.IsActive ? "Ativo" : "Inativo")
+                </span>
+            </td>
+            <td>
+                @* Links para editar/deletar o posicionamento específico *@
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

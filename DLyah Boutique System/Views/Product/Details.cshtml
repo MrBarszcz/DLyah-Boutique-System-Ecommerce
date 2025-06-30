@@ -1,0 +1,134 @@
+@model DLyah_Boutique_System.ViewModels.ProductDetailViewModel
+
+@{
+    ViewData["Title"] = Model.Product.ProductName;
+    Layout = "_Layout";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        @* --- COLUNA DA ESQUERDA: GALERIA DE IMAGENS --- *@
+        <div class="col-md-7 product-gallery">
+            <img src="@(
+                      Model.Images.Any() ? Model.Images.First()
+                          .ProductImagePath : "/path/to/placeholder.jpg"
+                      )"
+                 id="mainProductImage" class="main-image" alt="@Model.Product.ProductName">
+
+            <div class="thumbnail-list" id="thumbnailList">
+                @foreach (var (image, index) in Model.Images
+                                  .Take(3)
+                                  .Select((value, i) => (value, i))) {
+                    // Lógica para a terceira imagem (se houver mais de 3 no total)
+                    if (index == 2 && Model.Images.Count > 3) {
+                        <div class="thumbnail-item more-images-thumbnail" data-bs-toggle="modal"
+                             data-bs-target="#galleryModal">
+                            <img src="@image.ProductImagePath" alt="Ver mais imagens">
+                            <div class="more-images-overlay">+@(Model.Images.Count - 2)</div>
+                        </div>
+                    } else {
+                        <div class="thumbnail-item @(index == 0 ? "active" : "")"
+                             onclick="changeMainImage(this, '@image.ProductImagePath')">
+                            <img src="@image.ProductImagePath" alt="Miniatura do produto @(index + 1)">
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        @* --- COLUNA DA DIREITA: INFORMAÇÕES E AÇÕES --- *@
+        <div class="col-md-5">
+            <h2>@Model.Product.ProductName</h2>
+
+
+            <p class="text-muted">@Model.Product.ProductDescription</p>
+
+            <h3 class="my-3">@Model.Product.ProductPrice.ToString("C", new System.Globalization.CultureInfo("pt-BR"))</h3>
+
+            <hr>
+
+            @* --- Seleção de Cor --- *@
+            <div class="mb-3">
+                <h5>Cor: <span id="selectedColorName" class="text-muted"></span></h5>
+                <div class="d-flex flex-wrap gap-2" id="colorSelector">
+                    @foreach (var color in Model.AvailableColors) {
+                        <div class="color-option" data-color-id="@color.ColorId" data-color-name="@color.Color"
+                             onclick="selectVariant(this, 'color')">
+                            <div class="color-box" style="background-color: @color.HexColor;"></div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @* --- Seleção de Tamanho --- *@
+            <div class="mb-3">
+                <h5>Tamanho: <span id="selectedSizeName" class="text-muted"></span></h5>
+                <div class="d-flex flex-wrap gap-2" id="sizeSelector">
+                    @foreach (var size in Model.AvailableSizes) {
+                        <button type="button" class="btn btn-outline-secondary size-option" data-size-id="@size.SizeId"
+                                data-size-name="@size.Size" onclick="selectVariant(this, 'size')">
+                            @size.Size
+                        </button>
+                    }
+                </div>
+            </div>
+
+            @* --- Exibição de Estoque --- *@
+            <div id="stockInfo" class="mb-3" style="min-height: 24px;">
+            </div>
+
+            @* --- Botões de Ação --- *@
+            <div class="d-grid gap-2 mb-3">
+                <button class="btn btn-primary btn-lg" id="addToCartBtn" disabled>Adicionar ao Carrinho</button>
+                <button class="btn btn-success btn-lg" id="buyNowBtn" disabled>Comprar Agora</button>
+            </div>
+            <div class="d-flex justify-content-center">
+                <a href="#" class="btn btn-link text-muted"><i class="bi bi-heart"></i> Adicionar aos Favoritos</a>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+@* --- MODAL DA GALERIA DE IMAGENS (escondido por padrão) --- *@
+<div class="modal fade gallery-modal" id="galleryModal" tabindex="-1" aria-labelledby="galleryModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="galleryModalLabel">@Model.Product.ProductName</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="galleryCarousel" class="carousel slide" data-bs-ride="carousel">
+        2            <div class="carousel-inner">
+                        @foreach (var (image, index) in Model.Images.Select((value, i) => (value, i))) {
+                            <div class="carousel-item @(index == 0 ? "active" : "")">
+                                <img src="@image.ProductImagePath" class="d-block w-100" alt="Imagem @(index + 1)">
+                            </div>
+                        }
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#galleryCarousel"
+                            data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Anterior</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#galleryCarousel"
+                            data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Próxima</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+
+    <script>
+        // Passa os dados de estoque do C# para o JavaScript
+        const stockData = @Html.Raw(Json.Serialize(Model.StockPerCombination));
+    </script>
+}

@@ -1,0 +1,102 @@
+@model DLyah_Boutique_System.ViewModels.BannerViewModel
+
+@{
+    ViewBag.Title = "Atualizar Banner";
+    Layout = "_Layout";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Atualizar Banner</h1>
+
+    @* O formulário agora aponta para a action Edit *@
+    <form asp-controller="Banner" asp-action="Edit" method="post" id="productForm">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="BannerId"/>
+
+        <div class="mb-3">
+            <label class="form-label">Imagem Atual</label><br/>
+            <img src="@Model.ExistingImageUrl" style="max-width: 400px;" class="img-thumbnail" alt="@Model.Title"/>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="ImageUpload" class="form-label">Trocar Imagem (opcional)</label>
+            <input asp-for="ImageUpload" class="form-control" type="file"/>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Pré-visualização:</label>
+            <img id="imagePreview" src="#" alt="Pré-visualização da imagem" class="img-thumbnail" style="max-width: 400px; display: none;" />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label"></label>
+            <input asp-for="Title" class="form-control"/>
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label"></label>
+            <input asp-for="Description" class="form-control"/>
+        </div>
+        <div class="mb-3">
+            <label asp-for="LinkUrl" class="form-label">Link de Destino</label>
+            <input asp-for="LinkUrl" class="form-control"/>
+            <span asp-validation-for="LinkUrl" class="text-danger"></span>
+        </div>
+
+
+        <div class="mb-3 form-check form-switch"> @* Usando form-switch para um visual mais moderno *@
+
+            @* O asp-for vai garantir que o estado (marcado/desmarcado) venha correto do banco *@
+            <input class="form-check-input" type="checkbox" role="switch" asp-for="IsActive">
+
+            @* Damos um ID ao label para que o JavaScript possa encontrá-lo e mudar seu texto *@
+            <label class="form-check-label" asp-for="IsActive" id="isActiveLabel">
+                @* Usamos Razor para que o texto já carregue correto (Ativo ou Inativo) *@
+                @(Model.IsActive ? "Ativo" : "Inativo")
+            </label>
+        </div>
+
+        @* Div para a mensagem de ajuda. Ela começa oculta se o banner estiver ativo. *@
+        <div id="isActiveHelpText" class="form-text text-warning" style="@(Model.IsActive ? "display: none;" : "")">
+            Ao desativar, este banner não aparecerá mais em nenhuma página do site até ser reativado.
+        </div>
+
+        <div class="form-group mt-4">
+            <a role="button" class="btn btn-secondary" asp-action="Index">Cancelar</a>
+            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+        </div>
+    </form>
+
+    @section Scripts {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const isActiveCheckbox = document.getElementById('IsActive');
+                const isActiveLabel = document.getElementById('isActiveLabel');
+                const isActiveHelpText = document.getElementById('isActiveHelpText');
+
+                // Função para atualizar a interface com base no estado do checkbox
+                function updateActiveStatusUI() {
+                    if (isActiveCheckbox.checked) {
+                        // Se estiver MARCADO (Ativo)
+                        isActiveLabel.textContent = 'Ativo';
+                        isActiveLabel.classList.remove('text-danger'); // Remove a cor de perigo
+                        isActiveHelpText.style.display = 'none'; // Esconde a mensagem de ajuda
+                    } else {
+                        // Se estiver DESMARCADO (Inativo)
+                        isActiveLabel.textContent = 'Inativo';
+                        isActiveLabel.classList.add('text-danger'); // Adiciona uma cor de perigo para chamar atenção
+                        isActiveHelpText.style.display = 'block'; // Mostra a mensagem de ajuda
+                    }
+                }
+
+                // Adiciona um "ouvinte" que chama a função sempre que o estado do checkbox muda
+                if (isActiveCheckbox) {
+                    isActiveCheckbox.addEventListener('change', updateActiveStatusUI);
+                }
+            });
+        </script>
+
+        @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+        <script src="~/js/banner-form.js" asp-append-version="true"></script>
+    }
+</div>
