@@ -9,8 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DLyah_Boutique_System.Controllers;
 
-public class ProductController : Controller
-{
+public class ProductController : Controller {
     private readonly IProductRepository _productRepository;
     private readonly IGenderRepository _genderRepository;
     private readonly ICategoryRepository _categoryRepository;
@@ -119,9 +118,7 @@ public class ProductController : Controller
         return View(viewModel);
     }
 
-    // No seu ProductController.cs
 
-// GET: Product/Edit/5
     public IActionResult Edit(int id) {
         // Busca o produto no banco, incluindo todos os dados relacionados
         var product = _productRepository.FindById(id);
@@ -178,7 +175,7 @@ public class ProductController : Controller
 
         return View(viewModel);
     }
-    
+
     [ HttpPost ]
     [ ValidateAntiForgeryToken ]
     public async Task<IActionResult> Edit(ProductEditViewModel viewModel) {
@@ -436,5 +433,55 @@ public class ProductController : Controller
         viewModel.AvailableColors = _colorRepository.FindAll();
         viewModel.AvailableSizes = _sizeRepository.FindAll();
         return View(viewModel);
+    }
+
+    // No ProductController.cs
+// Não se esqueça de injetar IWebHostEnvironment no construtor se ainda não o fez.
+
+    [ HttpPost ]
+    [ ValidateAntiForgeryToken ]
+    public async Task<IActionResult> Kill(int id) {
+        var productToDelete = _productRepository.FindById(id);
+        if (productToDelete == null) {
+            return NotFound(
+                new {
+                    success = false,
+                    message = "Produto não encontrado."
+                }
+            );
+        }
+
+        try {
+            // 1. Deleta os arquivos de imagem físicos do servidor
+            foreach (var image in productToDelete.ProductImages) {
+                if (!string.IsNullOrEmpty(image.ProductImagePath)) {
+                    var fullPath = Path.Combine(_environment.WebRootPath, image.ProductImagePath.TrimStart('/'));
+                    if (System.IO.File.Exists(fullPath)) {
+                        System.IO.File.Delete(fullPath);
+                    }
+                }
+            }
+
+            // 2. Deleta o produto e todos os seus registros relacionados do banco
+            _productRepository.Kill(id);
+            await _productRepository.SaveChanges();
+
+            return Ok(
+                new {
+                    success = true,
+                    message = "Produto excluído com sucesso!"
+                }
+            );
+        } catch (Exception ex) {
+            // Em caso de erro (ex: o produto está em um pedido e não pode ser excluído)
+            return StatusCode(
+                500,
+                new {
+                    success = false,
+                    message =
+                        "Ocorreu um erro ao excluir o produto. Verifique se ele não está associado a pedidos existentes."
+                }
+            );
+        }
     }
 }

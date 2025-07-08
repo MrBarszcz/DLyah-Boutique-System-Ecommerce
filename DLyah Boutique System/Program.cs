@@ -17,10 +17,6 @@ builder.Logging.AddDebug();
 builder.Services.AddDbContext<BankContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Database")));
 
-builder.Services.AddDbContext<IdentityOnlyDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-
 // Add repository services
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>(); // Every time it is called, call the CategoryRepository
 builder.Services.AddScoped<ISizeRepository, SizeRepository>();

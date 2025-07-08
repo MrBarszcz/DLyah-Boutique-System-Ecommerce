@@ -15,7 +15,7 @@ public interface IProductRepository {
     ProductSizeModel CreateProductSize(int productId, int sizeId);
     ProductImageModel CreateProductImage(ProductImageModel productImage);
     StockProductModel CreateStockProduct(StockProductModel stock);
-    ProductModel Kill(ProductModel product);
+    void Kill(int id);
     
     void UpdateProductCategories(int productId, List<int> categoryIds);
     void UpdateProductColors(int productId, List<int> colorIds);

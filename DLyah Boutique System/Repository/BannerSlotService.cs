@@ -11,17 +11,8 @@ public class BannerSlotService : IBannerSlotService {
         {
             "Home", new List<string> {
                 "Header",
-                "Body-Top"
-            }
-        }, {
-            "Product_Details", new List<string> {
-                "Sidebar",
-                "Related_Products"
-            }
-        }, {
-            "Category", new List<string> {
-                "Header",
-                "Product_Grid_Middle"
+                "Body-Top",
+                "Body-Bottom"
             }
         }
         // Adicione mais tipos de página e suas posições aqui
@@ -36,10 +27,6 @@ public class BannerSlotService : IBannerSlotService {
             new SelectListItem {
                 Value = "Home",
                 Text = "Página Inicial (Homepage)"
-            },
-            new SelectListItem {
-                Value = "Product_Details",
-                Text = "Página de Detalhes do Produto (Geral)"
             }
         };
 

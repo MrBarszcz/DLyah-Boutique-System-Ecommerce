@@ -3,31 +3,45 @@
     ViewData["Title"] = "Bem-vindo(a)!";
 }
 
-@* --- 1. SEÇÃO DE BANNERS DO TOPO --- *@
-@if (Model.TopBanners.Any())
-{
-    @await Component.InvokeAsync("Banner", new { pageName = "Home", position = "Header" })
-}
-
+@await Component.InvokeAsync(
+    "Banner",
+    new {
+        pageName = "Home",
+        position = "Header"
+    }
+)
 
 <div class="container my-5">
 
-    @* --- 2. SEÇÃO DA VITRINE DE PRODUTOS --- *@
+    @* --- 2. TÍTULO DA VITRINE --- *@
     <div class="text-center mb-5">
         <h1 class="display-4">Nossa Vitrine</h1>
         <p class="lead text-muted">Confira os produtos mais recentes que chegaram na D'Lyah Boutique</p>
     </div>
-    
-    @if(Model.ShowcaseProducts.Any())
-    {
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-            @foreach (var product in Model.ShowcaseProducts)
-            {
+
+    @* --- 3. BANNER ACIMA DA VITRINE (BODY-TOP) --- *@
+    @await Component.InvokeAsync(
+        "Banner",
+        new {
+            pageName = "Home",
+            position = "Body-Top"
+        }
+    )
+
+
+    @* --- 4. GRADE DE PRODUTOS --- *@
+    @if (Model.ShowcaseProducts.Any()) {
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mt-1">
+            @foreach (var product in Model.ShowcaseProducts) {
                 <div class="col">
-                    <div class="product-card card">
-                        <a asp-controller="Product" asp-action="Details" asp-route-id="@product.ProductId" class="text-decoration-none">
+                    <div class="product-card card h-100">
+                        <a asp-controller="Product" asp-action="Details" asp-route-id="@product.ProductId"
+                           class="text-decoration-none">
                             <div class="card-img-container">
-                                <img src="@(product.ProductImages.Any() ? product.ProductImages.First().ProductImagePath : "/images/placeholder.png")" 
+                                <img src="@(
+                                          product.ProductImages.Any() ? product.ProductImages.First()
+                                              .ProductImagePath : "/images/placeholder.png"
+                                          )"
                                      class="card-img-top" alt="@product.ProductName">
                             </div>
                             <div class="card-body text-center">
@@ -36,7 +50,7 @@
                                     <p class="card-price">@product.ProductPrice.ToString("C")</p>
                                 </div>
                                 <div class="mt-3">
-                                     <span class="btn btn-dark">Ver Detalhes</span>
+                                    <span class="btn btn-dark">Ver Detalhes</span>
                                 </div>
                             </div>
                         </a>
@@ -44,12 +58,22 @@
                 </div>
             }
         </div>
-    }
-    else
-    {
+    } else {
         <div class="text-center p-5">
             <p>Nenhum produto para exibir na vitrine no momento.</p>
             <a asp-controller="Product" asp-action="Register" class="btn btn-primary">Cadastrar Primeiro Produto</a>
         </div>
     }
+
+    @* --- 5. BANNER ABAIXO DA VITRINE (BODY-BOTTOM) --- *@
+    <div class="mt-5">
+        @await Component.InvokeAsync(
+            "Banner",
+            new {
+                pageName = "Home",
+                position = "Body-Bottom"
+            }
+        )
+    </div>
+
 </div>

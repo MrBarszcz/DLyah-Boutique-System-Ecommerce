@@ -140,11 +140,11 @@
                                     <li class="dropdown-header">Estoque por combinação</li>
                                     @foreach (var stockItem in product.StockProducts) {
                                         <li class="d-flex justify-content-between align-items-center px-3 py-1">
-                                        <span>
-                                            <div class="color-box color-s me-2"
-                                                 style="background-color:@stockItem.Color.HexColor"></div>
-                                            @stockItem.Size.Size
-                                        </span>
+                                            <span>
+                                                <div class="color-box color-s me-2"
+                                                     style="background-color:@stockItem.Color.HexColor"></div>
+                                                @stockItem.Size.Size
+                                            </span>
                                             <span class="badge bg-primary rounded-pill">@stockItem.StockQuantity</span>
                                         </li>
                                     }
@@ -170,9 +170,14 @@
                             <a role="button" class="btn btn-sm btn-outline-primary"
                                asp-route-id="@product.Product.ProductId"
                                asp-controller="Product" asp-action="Edit" title="Editar"><i
-                                    class="bi bi-pencil"></i></a> @* <<< CORRIGIDO AQUI *@
-                            <a role="button" class="btn btn-sm btn-outline-danger btn-delete-product"
-                               data-product-id="@product.Product.ProductId" title="Excluir"><i class="bi bi-trash"></i></a>
+                                                                                             class="bi bi-pencil"></i></a> @* <<< CORRIGIDO AQUI *@
+                            <button type="button" class="btn btn-sm btn-outline-danger btn-delete-product"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#confirmDeleteProductModal"
+                                    data-product-id="@product.Product.ProductId"
+                                    title="Excluir">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -184,4 +189,30 @@
         }
         </tbody>
     </table>
+    
+    <div class="modal fade" id="confirmDeleteProductModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel">Confirmar Exclusão de Produto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Você tem certeza que quer excluir este produto?</p>
+                    <p class="text-danger">Todos os dados relacionados (estoque, imagens, etc.) serão perdidos. Esta ação não poderá ser desfeita.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteProductBtn">Sim, Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    @section Scripts {
+        @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+
+        @* Adiciona a referência ao script específico desta página *@
+        <script src="~/js/product-admin.js" asp-append-version="true"></script>
+    }
 </div>

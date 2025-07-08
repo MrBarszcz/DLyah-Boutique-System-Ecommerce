@@ -162,8 +162,12 @@ public class ProductRepository : IProductRepository
         return stock;
     }
 
-    public ProductModel Kill(ProductModel product) {
-        throw new NotImplementedException();
+    public void Kill(int id) {
+        var product = FindById(id);
+
+        if (product != null) {
+            _context.Products.Remove(product);
+        }
     }
 
     public void UpdateProductCategories(int productId, List<int> categoryIds) {

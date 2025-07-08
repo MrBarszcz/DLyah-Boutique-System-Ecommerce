@@ -28,4 +28,8 @@
       <Folder Include="wwwroot\images\users\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Views\ControlPanel\Index.cshtml" />
+    </ItemGroup>
+
 </Project>
