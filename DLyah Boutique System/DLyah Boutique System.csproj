@@ -24,6 +24,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Configurations\Banners\Struct\" />
       <Folder Include="wwwroot\images\products\" />
       <Folder Include="wwwroot\images\users\" />
     </ItemGroup>

@@ -1,0 +1,77 @@
+{
+  "PageSlots": [
+    {
+      "PageType": "Home",
+      "Positions": [
+        {
+          "Name": "Header",
+          "Description": "Carrossel principal no topo da página.",
+          "RequiredDimensions": [ { "Width": 1920, "Height": 927 } ]
+        },
+        {
+          "Name": "Benefits_Top",
+          "Description": "Banner com beneficios da loja, posicionado abaixo do header e acima dos destaques",
+          "RequiredDimensions": [ { "Width": 1920, "Height": 215 } ]
+        },
+        {
+          "Name": "Body",
+          "Description": "Banners acima da vitrine e abaixo dos destaques.",
+          "ContainerMaxWidth": 1870,
+          "ContainerMaxHeight": 940,
+          "LayoutRules": [ 
+            {
+              "ImageCount": 1,
+              "RequiredDimensions": [ { "Width": 1870, "Height": 800 } ]
+            },
+            {
+              "ImageCount": 2,
+              "LayoutOptions": [
+                {
+                  "LayoutName": "Duplo Vertical",
+                  "Dimensions": [
+                    { "Width": 1870, "Height": 800 },
+                    { "Width": 1870, "Height": 800 }
+                  ]
+                },
+                {
+                  "LayoutName": "Duplo Horizontal",
+                  "Dimensions": [
+                    { "Width": 935, "Height": 400 },
+                    { "Width": 935, "Height": 400 }
+                  ]
+                }
+              ]
+            },
+            {
+              "ImageCount": 3,
+              "RequiredDimensions": [
+                { "Width": 935, "Height": 400 },
+                { "Width": 935, "Height": 400 },
+                { "Width": 1870, "Height": 400 }
+              ]
+            },
+            {
+              "ImageCount": 4,
+              "RequiredDimensions": [
+                { "Width": 935, "Height": 400 },
+                { "Width": 935, "Height": 400 },
+                { "Width": 935, "Height": 400 },
+                { "Width": 935, "Height": 400 }
+              ]
+            }
+          ]
+        },
+        {
+          "Name": "Footer",
+          "Description": "Banner posicionado abaixo da vitrine e acima do Benefits",
+          "RequiredDimensions": [ { "Width": 1920, "Height": 800 } ]
+        },
+        {
+          "Name": "Benefits_Bottom",
+          "Description": "Banner com beneficios da loja, posicionado acima do footer",
+          "RequiredDimensions": [ { "Width": 1920, "Height": 215 } ]
+        }
+      ]
+    }
+  ]
+}                                                                                                                              

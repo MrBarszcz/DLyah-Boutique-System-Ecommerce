@@ -1,0 +1,11 @@
+Banner {
+    quero organizar a busca, fazer um arquivo(.json para poder ser atualizado sem problema) com uma lista de posições(header, body, footer...) e isso ser uma classe do lugar no na view(.cshtml) e lida na hora de posicionar um banner.
+    
+    uma classe que determina a organizanização de multiplas imagens(carrossel, mosaico...) podendo ser escolhido na hora de posicionar o banner e multiplas por opção(mosaico com tais imagens e em carrossel mostrando outras).
+    
+    quero uma classe para determinar o tamanho das imagens, dependendo da posição colocada, organição de mutiplas imagens(carrossel, mosaico...), e um required na hora de posicionar se a imagem tiver dimensões erradas.
+}
+
+Models {
+    quero tirar os arquivos model que não são do banco de dados e mudar para viewModels.
+}
