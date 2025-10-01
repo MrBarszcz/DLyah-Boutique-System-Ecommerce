@@ -3,6 +3,7 @@ using DLyah_Boutique_System.Data;
 using DLyah_Boutique_System.Repository;
 using DLyah_Boutique_System.Services;
 using Microsoft.EntityFrameworkCore;
+using DLyah_Boutique_System.Configurations.Banners;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,13 @@ builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 builder.Services.AddScoped<IBannerRepository, BannerRepository>();
 builder.Services.AddScoped<IBannerPlacementRepository, BannerPlacementRepository>();
 builder.Services.AddScoped<IBannerSlotService, BannerSlotService>();
+
+// Reads the .json file
+builder.Configuration.AddJsonFile("ConfigData/bannerSlot.json", optional: true, reloadOnChange: true);
+
+// Connects the .json file to your c# classes
+builder.Services.Configure<BannerSlotSettings>(builder.Configuration.GetSection("BannerSlots"));
+
 
 
 var app = builder.Build();

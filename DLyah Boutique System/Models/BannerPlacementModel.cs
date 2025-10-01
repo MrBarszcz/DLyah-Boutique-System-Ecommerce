@@ -29,6 +29,14 @@ public class BannerPlacementModel {
     [Required]
     [Column("banner_id")]
     public int BannerId { get; set; }
+    
+    [Required]
+    [Column("display_type")]
+    public string DisplayType { get; set; } = "Default"; // Ex: "Carousel", "Mosaic", "Default"
+
+    [Column("layout_name")]
+    public string? LayoutName { get; set; } // Ex: "Duplo Vertical", pode ser nulo
+
 
     // Propriedade de navegação para o banner correspondente
     [ForeignKey("BannerId")]

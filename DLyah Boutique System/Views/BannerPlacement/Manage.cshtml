@@ -1,21 +1,23 @@
 @model DLyah_Boutique_System.ViewModels.BannerPlacementViewModel
+@using System.Text.Json
 
 @{
-    ViewData["Title"] = $"Gerenciar Banners: {Model.PageName}";
+    ViewData[ "Title" ] = $"Gerenciar Banners para: {Model.PageName}";
     Layout = "_Layout";
 }
 
 @* Título dinâmico que mostra qual página está sendo gerenciada *@
-<h1>Gerenciar Banners para: <span class="text-primary">@Model.PageName</span></h1>
+<h1>@ViewData[ "Title" ]</h1>
 <p class="text-muted">Adicione, remova e futuramente reordene os banners que aparecem nesta página específica.</p>
+
 <a asp-action="Create" class="btn btn-sm btn-outline-secondary mb-3">
     <i class="bi bi-arrow-left"></i> Voltar para a seleção de página
 </a>
 
 
-@if (TempData["SuccessMessage"] != null) {
+@if ( TempData[ "SuccessMessage" ] != null ) {
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["SuccessMessage"]
+        @TempData[ "SuccessMessage" ]
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
@@ -27,8 +29,8 @@
         <h3>Banners Atuais na Página (@Model.CurrentPlacements.Count)</h3>
         <p class="small text-muted">A ordem de exibição define qual banner aparece primeiro no carrossel.</p>
         <ul class="list-group">
-            @if (Model.CurrentPlacements.Any()) {
-                @foreach (var placement in Model.CurrentPlacements) {
+            @if ( Model.CurrentPlacements.Any() ) {
+                @foreach ( var placement in Model.CurrentPlacements ) {
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center">
                             <span class="badge bg-dark me-3 p-2">#@placement.DisplayOrder</span>
@@ -40,8 +42,8 @@
                         </div>
 
                         <div class="d-flex align-items-center">
-                             <span class="badge bg-@(placement.IsActive ? "success" : "secondary") me-3">
-                                @(placement.IsActive ? "Ativo" : "Inativo")
+                            <span class="badge bg-@( placement.IsActive ? "success" : "secondary" ) me-3">
+                                @( placement.IsActive ? "Ativo" : "Inativo" )
                             </span>
                             @* Mini-formulário para remover este posicionamento específico *@
                             <form asp-action="RemovePlacement" method="post" class="d-inline">
@@ -71,18 +73,23 @@
                 Adicionar Banner a "@Model.PageName"
             </div>
             <div class="card-body">
-                @if (Model.AvailableBanners.Any()) {
+                @if ( Model.AvailableBanners.Any() ) {
                     <form asp-action="AddPlacement" method="post">
                         @Html.AntiForgeryToken()
                         @* Campo oculto para enviar o nome da página que estamos editando *@
                         <input type="hidden" name="PageName" value="@Model.PageName"/>
 
                         <div class="mb-3">
-                            <label for="BannerIdToAdd" class="form-label">1. Escolha um banner do seu catálogo:</label>
-                            <select name="BannerIdToAdd" class="form-select"
-                                    asp-items="@(new SelectList(Model.AvailableBanners, "BannerId", "Title"))">
-                                <option value="">-- Selecione um banner --</option>
+                            <label for="BannerIdsToAdd" class="form-label">1. Escolha um ou mais banners:</label>
+                            @* Garanta que o select tem o atributo "multiple" e o name no plural *@
+                            <select id="banner-select" name="BannerIdsToAdd" class="form-select" multiple
+                                    style="height: 150px;">
+                                @foreach ( var banner in Model.AvailableBanners ) {
+                                    <option value="@banner.BannerId">@banner.Title</option>
+                                }
                             </select>
+                            <small class="form-text text-muted">Segure Ctrl (ou Cmd no Mac) para selecionar
+                                vários.</small>
                         </div>
 
                         <div class="mb-3">
@@ -92,6 +99,38 @@
                                 <option value="">-- Selecione uma posição --</option>
                             </select>
                         </div>
+
+                        @* --- INÍCIO DAS ADIÇÕES --- *@
+
+                        <div id="display-type-container" class="mb-3" style="display: none;">
+                            <label class="form-label">3. Como esses banners devem ser exibidos?</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="DisplayTypeToAdd"
+                                       id="display-type-single" value="Single">
+                                <label class="form-check-label" for="display-type-single">
+                                    Apenas um banner (se só um for selecionado)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="DisplayTypeToAdd"
+                                       id="display-type-carousel" value="Carousel">
+                                <label class="form-check-label" for="display-type-carousel">
+                                    Carrossel (se vários forem selecionados)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="DisplayTypeToAdd"
+                                       id="display-type-mosaic" value="Mosaic">
+                                <label class="form-check-label" for="display-type-mosaic">
+                                    Mosaico (se vários forem selecionados)
+                                </label>
+                            </div>
+                        </div>
+
+                        @* Área para mostrar as regras de dimensão para o admin *@
+                        <div id="dimension-rules-display" class="alert alert-info mt-3" style="display: none;"></div>
+
+                        @* --- FIM DAS ADIÇÕES --- *@
 
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Adicionar à
@@ -111,3 +150,20 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    @* 1. Carrega o nosso novo arquivo de script externo *@
+    <script src="~/js/banner-placement-form.js"></script>
+
+    <script>
+        // 2. Espera a página carregar
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // 3. Pega os dados do C# e cria a variável JavaScript (a "ponte")
+            const pageConfigData = @Html.Raw( Json.Serialize( Model.CurrentPageSlot ) );
+
+            // 4. Chama a função do arquivo externo, entregando os dados para ela
+            initializeBannerPlacementForm(pageConfigData);
+        });
+    </script>
+}

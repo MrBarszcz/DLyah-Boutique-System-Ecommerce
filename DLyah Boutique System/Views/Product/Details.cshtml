@@ -101,7 +101,7 @@
             </div>
             <div class="modal-body">
                 <div id="galleryCarousel" class="carousel slide" data-bs-ride="carousel">
-        2            <div class="carousel-inner">
+                    <div class="carousel-inner">
                         @foreach (var (image, index) in Model.Images.Select((value, i) => (value, i))) {
                             <div class="carousel-item @(index == 0 ? "active" : "")">
                                 <img src="@image.ProductImagePath" class="d-block w-100" alt="Imagem @(index + 1)">

@@ -7,56 +7,66 @@ namespace DLyah_Boutique_System.Repository;
 public class BannerPlacementRepository : IBannerPlacementRepository {
     private readonly BankContext _context;
 
-    public BannerPlacementRepository(BankContext context) {
+    public BannerPlacementRepository( BankContext context ) {
         _context = context;
     }
 
-    public List<BannerPlacementModel> FindByPage(string pageName) {
-        return _context.BannerPlacements
-            .Include(p => p.Banner) // Inclui os dados do banner
-            .Where(p => p.PageName == pageName)
-            .OrderBy(p => p.DisplayOrder)
-            .ToList();
+    public List<BannerPlacementModel> FindByPage( string pageName ) {
+        return _context.BannerPlacements.Include( p => p.Banner ) // Inclui os dados do banner
+                       .Where( p => p.PageName == pageName )
+                       .OrderBy( p => p.DisplayOrder )
+                       .ToList();
     }
 
-    public async Task<BannerPlacementModel> FindById(int placementId) {
-        return await _context.BannerPlacements.FindAsync(placementId);
+    public async Task<BannerPlacementModel> FindById( int placementId ) {
+        return await _context.BannerPlacements.FindAsync( placementId );
     }
 
-    public void AddPlacement(string pageName, int bannerId, string position) {
-        // Calcula a próxima ordem de exibição para esta página e posição específicas.
-        var lastOrder = _context.BannerPlacements
-                            .Where(p => p.PageName == pageName && p.Position == position)
-                            .Max(p => (int?)p.DisplayOrder)
+    public async Task<List<BannerPlacementModel>> FindByPageAndPositionAsync( string pageName, string position ) {
+        return await _context.BannerPlacements.Where( p => p.PageName == pageName && p.Position == position )
+                             .Include( p => p.Banner ) // Essencial para o ViewComponent
+                             .OrderBy( p => p.DisplayOrder )
+                             .ToListAsync();
+    }
+
+    public void AddPlacement( string pageName, int bannerId, string position, string displayType, string? layoutName ) {
+        // Sua ótima lógica para calcular a ordem foi mantida!
+        var lastOrder = _context.BannerPlacements.Where( p => p.PageName == pageName && p.Position == position )
+                                .Max( p => (int?)p.DisplayOrder )
                         ?? 0;
 
         var newPlacement = new BannerPlacementModel {
             PageName = pageName,
             BannerId = bannerId,
-            Position = position, // Salva a posição
-            DisplayOrder = lastOrder + 1, // Define como o próximo na ordem
-            IsActive = true
+            Position = position,
+            DisplayOrder = lastOrder + 1,
+            IsActive = true,
+
+            // Novos campos adicionados
+            DisplayType = displayType,
+            LayoutName = layoutName
         };
 
-        _context.BannerPlacements.Add(newPlacement);
+        _context.BannerPlacements.Add( newPlacement );
     }
 
     public List<BannerPlacementModel> FindAll() {
         return _context.BannerPlacements
-            .Include(p => p.Banner) // Inclui os dados do banner para exibir o título na lista
-            .OrderBy(p => p.PageName)
-            .ThenBy(p => p.DisplayOrder)
-            .ToList();
+                       .Include( p => p.Banner ) // Inclui os dados do banner para exibir o título na lista
+                       .OrderBy( p => p.PageName )
+                       .ThenBy( p => p.DisplayOrder )
+                       .ToList();
     }
 
-    public void UpdatePlacement(int placementId, string pageName, int bannerId) {
+    public void UpdatePlacement( int placementId, string pageName, int bannerId ) {
         throw new NotImplementedException();
     }
 
-    public void Delete(int placementId) {
-        var placement = _context.BannerPlacements.Find(placementId);
+    public void Delete( int placementId ) {
+        var placement = _context.BannerPlacements.Find( placementId );
+
         if (placement != null) {
-            _context.BannerPlacements.Remove(placement);
+            _context.BannerPlacements.Remove( placement );
         }
     }
 

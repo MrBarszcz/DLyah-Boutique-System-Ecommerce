@@ -1,0 +1,123 @@
+{
+  "BannerSlots": {
+    "PageSlots": [
+      {
+        "PageType": "Home",
+        "Positions": [
+          {
+            "Name": "Header",
+            "Description": "Carrossel principal no topo da página.",
+            "LayoutRules": [
+              {
+                "DisplayType": "Carousel",
+                "LayoutOptions": [
+                  {
+                    "LayoutName": "Padrão",
+                    "Dimensions": [ { "Width": 1920, "Height": 927 } ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "Name": "Benefits_Top",
+            "Description": "Banner com beneficios da loja.",
+            "LayoutRules": [
+              {
+                "DisplayType": "Single",
+                "LayoutOptions": [
+                  {
+                    "LayoutName": "Padrão",
+                    "Dimensions": [ { "Width": 1920, "Height": 215 } ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "Name": "Body",
+            "Description": "Banners acima da vitrine.",
+            "ContainerMaxWidth": 1870,
+            "ContainerMaxHeight": 940,
+            "LayoutRules": [
+              {
+                "DisplayType": "Mosaic",
+                "ImageCount": 1,
+                "LayoutOptions": [
+                  {
+                    "LayoutName": "Banner Único Grande",
+                    "Dimensions": [ { "Width": 1870, "Height": 800 } ]
+                  }
+                ]
+              },
+              {
+                "DisplayType": "Mosaic",
+                "ImageCount": 2,
+                "LayoutOptions": [
+                  {
+                    "LayoutName": "Duplo Vertical",
+                    "Dimensions": [ { "Width": 1870, "Height": 400 }, { "Width": 1870, "Height": 400 } ]
+                  },
+                  {
+                    "LayoutName": "Duplo Horizontal",
+                    "Dimensions": [ { "Width": 935, "Height": 400 }, { "Width": 935, "Height": 400 } ]
+                  }
+                ]
+              },
+              {
+                "DisplayType": "Mosaic",
+                "ImageCount": 3,
+                "LayoutOptions": [
+                  {
+                    "LayoutName": "Mosaico Destaque Esquerda",
+                    "Dimensions": [ { "Width": 935, "Height": 800 }, { "Width": 935, "Height": 400 }, { "Width": 935, "Height": 400 } ]
+                  }
+                ]
+              },
+              {
+                "DisplayType": "Mosaic",
+                "ImageCount": 4,
+                "LayoutOptions": [
+                  {
+                    "LayoutName": "Grade 2x2",
+                    "Dimensions": [ { "Width": 935, "Height": 400 }, { "Width": 935, "Height": 400 }, { "Width": 935, "Height": 400 }, { "Width": 935, "Height": 400 } ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "Name": "Footer",
+            "Description": "Banner posicionado acima do rodapé.",
+            "LayoutRules": [
+              {
+                "DisplayType": "Single",
+                "LayoutOptions": [
+                  {
+                    "LayoutName": "Padrão",
+                    "Dimensions": [ { "Width": 1920, "Height": 800 } ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "Name": "Benefits_Bottom",
+            "Description": "Banner com beneficios da loja.",
+            "LayoutRules": [
+              {
+                "DisplayType": "Single",
+                "LayoutOptions": [
+                  {
+                    "LayoutName": "Padrão",
+                    "Dimensions": [ { "Width": 1920, "Height": 215 } ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

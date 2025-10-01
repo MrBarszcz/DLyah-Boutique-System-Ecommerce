@@ -1,64 +1,26 @@
-using Microsoft.AspNetCore.Mvc.Rendering;
+using DLyah_Boutique_System.Configurations.Banners;
+using Microsoft.Extensions.Options;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DLyah_Boutique_System.Repository;
 
 public class BannerSlotService : IBannerSlotService {
-    private readonly ICategoryRepository _categoryRepo;
+    private readonly BannerSlotSettings _slotSettings;
 
-    // O mapa central de todas as posições de banner do site.
-    // A chave é o "Tipo de Página", o valor é uma lista de nomes de posição.
-    private readonly Dictionary<string, List<string>> _slotMap = new Dictionary<string, List<string>> {
-        {
-            "Home", new List<string> {
-                "Header",
-                "Body-Top",
-                "Body-Bottom"
-            }
-        }
-        // Adicione mais tipos de página e suas posições aqui
-    };
-
-    public BannerSlotService(ICategoryRepository categoryRepo) {
-        _categoryRepo = categoryRepo;
+    // Injetamos as configurações que foram carregadas no Program.cs
+    public BannerSlotService(IOptions<BannerSlotSettings> slotSettings) {
+        // .Value acessa o objeto BannerSlotSettings preenchido com os dados do JSON
+        _slotSettings = slotSettings.Value;
     }
 
-    public List<SelectListItem> FindPages() {
-        var pages = new List<SelectListItem> {
-            new SelectListItem {
-                Value = "Home",
-                Text = "Página Inicial (Homepage)"
-            }
-        };
-
-        var allCategories = _categoryRepo.FindAll();
-        foreach (var category in allCategories) {
-            // A página de categoria usará as posições definidas para o tipo "Category" no mapa.
-            pages.Add(
-                new SelectListItem {
-                    Value = $"Category_{category.CategoryId}",
-                    Text = $"Página da Categoria: {category.Category}"
-                }
-            );
-        }
-
-        return pages;
+    public List<string> FindPages() {
+        // Lê os tipos de página diretamente do objeto de configuração
+        return _slotSettings.PageSlots?.Select(p => p.PageType).ToList() ?? new List<string>();
     }
 
-    public List<SelectListItem> FindPositions(string pageName) {
-        string pageType = pageName.Contains('_') ? pageName.Split('_')[0] : pageName;
-
-        if (_slotMap.ContainsKey(pageType)) {
-            return _slotMap[pageType]
-                .Select(
-                    pos => new SelectListItem {
-                        Value = pos,
-                        Text = pos
-                    }
-                )
-                .ToList();
-        }
-
-        // Retorna uma lista vazia se a página não tiver posições definidas
-        return new List<SelectListItem>();
+    public PageSlot FindPositions(string pageType) {
+        // Encontra e retorna o objeto de configuração completo para a página solicitada
+        return _slotSettings.PageSlots?.FirstOrDefault(p => p.PageType == pageType);
     }
 }
