@@ -30,7 +30,7 @@ Esta plataforma não é apenas um site, mas um sistema de gerenciamento de negó
 
 O projeto é executado como uma pilha de três containers que se comunicam através de uma rede Docker privada (`dlyah-net`), com um volume persistente para o banco de dados e um volume compartilhado para arquivos estáticos.
 
-Esta arquitetura desacopla a entrega de arquivos estáticos (Nginx) da lógica de negócios (App C#), melhorando drasticamente o desempenho.
+Esta arquitetura desacopla a entrega de arquivos estáticos (Nginx) da lógica de negócios (App C#), melhorando drasticdamente o desempenho.
 
 ```mermaid
 graph TD
