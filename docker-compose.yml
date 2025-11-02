@@ -1,0 +1,53 @@
+services:
+  app:
+    build: .
+    container_name: dlyah-app-container
+    environment:
+      - ConnectionStrings__Database=Server=db;Database=DB_DLyah;User Id=sa;Password=MrBars@1314;TrustServerCertificate=True
+      - ASPNETCORE_URLS=http://+:8000
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - dlyah-net
+    volumes:
+      - static-files:/app/wwwroot
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: dlyah-db-container
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=MrBars@1314
+    volumes:
+      - db-dlyah-data:/var/opt/mssql
+    networks:
+      - dlyah-net
+    ports:
+      - "1433:1433"
+    healthcheck:
+      test: [ "CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "MrBars@1314", "-C", "-q", "SELECT 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      
+  nginx:
+    image: nginx:alpine
+    container_name: dlyah-nginx-proxy
+    ports:
+      - "8000:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - static-files:/usr/share/nginx/html/wwwroot
+    networks:
+      - dlyah-net
+    depends_on:
+      - app
+
+volumes:
+  db-dlyah-data: {}
+  static-files: {}
+  
+networks:
+  dlyah-net: {}
