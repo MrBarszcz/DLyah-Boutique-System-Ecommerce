@@ -28,30 +28,41 @@ Esta plataforma não é apenas um site, mas um sistema de gerenciamento de negó
 
 ## 📐 Arquitetura da Infraestrutura (Docker)
 
-O projeto é executado como uma pilha de três containers que se comunicam através de uma rede Docker privada (`dlyah-net`), com um volume persistente para o banco de dados e um volume compartilhado para arquivos estáticos.
+O projeto é executado como uma pilha de três containers orquestrados pelo Docker Compose e conectados por uma rede privada (`dlyah-net`). Esta arquitetura desacopla a aplicação, o proxy e o banco de dados.
 
-Esta arquitetura desacopla a entrega de arquivos estáticos (Nginx) da lógica de negócios (App C#), melhorando drasticdamente o desempenho.
+A infraestrutura é composta pelos seguintes serviços:
 
-```mermaid
-graph TD
-    subgraph "Navegador do Usuário"
-        U(Usuário)
-    end
+* **`nginx` (O Proxy Reverso / Porta de Entrada)**
+    * Este é o único container exposto ao mundo exterior (no `localhost:8000`).
+    * Ele tem **duas funções**:
+        1.  **Servidor de Arquivos Estáticos:** Intercepta requisições `GET` para arquivos (CSS, JS, imagens) e os entrega diretamente, sem incomodar a aplicação C#.
+        2.  **Proxy Reverso:** Repassa todas as outras requisições (como carregamento de páginas HTML ou envios de formulário `POST`) para o container `app`.
+    * Lê do volume compartilhado `static-files`.
 
-    U -- "GET / (Página HTML)" --> Nginx[<img src='[https://static-00.iconduck.com/assets.00/nginx-icon-2048x2048-g2i5cpun.png](https://static-00.iconduck.com/assets.00/nginx-icon-2048x2048-g2i5cpun.png)' width='40' /><br/>Nginx Proxy<br/>(nginx)]
-    U -- "GET /logo.png (Imagem)" --> Nginx
+* **`app` (A Aplicação C# / Kestrel)**
+    * Este container **não** é exposto publicamente. Ele só aceita conexões vindas do `nginx`.
+    * Executa toda a lógica de negócios, renderiza o HTML e se comunica com o banco de dados.
+    * Quando um usuário faz upload de uma imagem, este container salva o arquivo no volume compartilhado `static-files`.
+    * Escreve no volume `static-files`.
 
-    subgraph "Rede Docker (dlyah-net)"
-        Nginx -- "proxy_pass (HTML)" --> App[<img src='[https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/.NET_Core_Logo.svg/2048px-.NET_Core_Logo.svg.png](https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/.NET_Core_Logo.svg/2048px-.NET_Core_Logo.svg.png)' width='40' /><br/>App C# / Kestrel<br/>(app)]
-        
-        App -- "SELECT/INSERT" --> DB[<img src='[https://symbols.getvecta.com/stencil_261/33_sql-database.00d1d60b37.svg](https://symbols.getvecta.com/stencil_261/33_sql-database.00d1d60b37.svg)' width='40' /><br/>SQL Server<br/>(db)]
-        
-        App -- "POST (Escreve Imagens)" --> VolStatic(vol: static-files<br/>/app/wwwroot)
-        Nginx -- "GET (Lê Imagens)" --> VolStatic
-        
-        DB -- "Persiste Dados" --> VolDB(vol: db-dlyah-data<br/>/var/opt/mssql)
-    end
-```
+* **`db` (O Banco de Dados MS SQL Server)**
+    * Este container também **não** é exposto publicamente (exceto para depuração local na porta `1433`).
+    * Ele só aceita conexões do container `app`.
+    * O `app` espera o `healthcheck` deste container passar (ficar "healthy") antes de iniciar, evitando erros de conexão.
+    * Todos os seus dados são persistidos no volume `db-dlyah-data`.
+
+### Volumes (Discos Persistentes)
+
+1.  **`db-dlyah-data`:**
+    * Conectado apenas ao `db`.
+    * Armazena os arquivos `.mdf`/`.ldf` do SQL Server, garantindo que os dados do banco de dados sobrevivam se o container for recriado.
+
+2.  **`static-files` (O "Disco Compartilhado"):**
+    * Este é o "elo" entre o `nginx` e o `app`.
+    * É montado em `/app/wwwroot` no container `app`.
+    * É montado em `/var/www/static` (ou similar) no container `nginx`.
+    * **Fluxo de Upload:** O `app` escreve um arquivo em `/app/wwwroot`.
+    * **Fluxo de Download:** O `nginx` lê o *mesmo* arquivo de `/var/www/static` e o entrega ao usuário.
 
 ## 📂 Arquitetura da Aplicação (Domínios de Negócio)
 
