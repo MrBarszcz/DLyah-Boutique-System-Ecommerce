@@ -12,7 +12,7 @@ services:
     networks:
       - dlyah-net
     volumes:
-      - static-files:/app/wwwroot
+      - ./DLyah Boutique System/wwwroot:/app/wwwroot
 
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -39,7 +39,7 @@ services:
       - "8000:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - static-files:/usr/share/nginx/html/wwwroot
+      - ./DLyah Boutique System/wwwroot:/static
     networks:
       - dlyah-net
     depends_on:

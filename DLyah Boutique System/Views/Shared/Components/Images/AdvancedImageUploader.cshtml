@@ -1,0 +1,27 @@
+<div id="image-drop-zone" class="drop-zone">
+    Arraste e solte as imagens aqui, ou <strong>clique para selecionar</strong>.
+</div>
+
+<input type="file" id="file-input" multiple accept="image/*" style="display: none"/>
+
+<div id="image-preview-list" class="preview-list">
+</div>
+
+<template id="image-preview-template">
+    <div class="preview-item" data-id=""> <img src="" alt="Pré-visualização" class="preview-thumbnail" />
+        <span class="preview-name">nome-do-arquivo.jpg</span>
+        <button typea="button" class="preview-delete-btn">&times;</button>
+        <div class="drag-handle">::</div>
+    </div>
+</template>
+
+<style>
+    .drop-zone { border: 2px dashed #ccc; padding: 25px; text-align: center; cursor: pointer; }
+    .drop-zone.drag-over { border-color: #007bff; background-color: #f8f9fa; }
+    .preview-list { display: flex; flex-wrap: wrap; margin-top: 15px; }
+    .preview-item { position: relative; margin: 10px; border: 1px solid #ddd; padding: 5px; text-align: center; }
+    .preview-thumbnail { max-width: 150px; max-height: 150px; }
+    .preview-name { display: block; font-size: 12px; }
+    .preview-delete-btn { position: absolute; top: 0; right: 0; background: red; color: white; border: none; cursor: pointer; }
+    .drag-handle { cursor: move; }
+</style>

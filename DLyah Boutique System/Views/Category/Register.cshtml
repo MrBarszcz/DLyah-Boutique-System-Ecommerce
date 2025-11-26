@@ -1,4 +1,4 @@
-@model CategoryModel
+@model DLyah_Boutique_System.ViewModels.CategoryViewModel
 
 @{
     Layout = "_Layout";
@@ -10,7 +10,11 @@
     <form class="form-control" asp-controller="Category" asp-action="Register" method="post">
         <div class="mb-3">
             <label for="category" class="form-label">Categoria</label>
-            <input type="text" asp-for="Category" class="form-control" id="category"  placeholder="Ex: Camisa">
+            <input type="text" asp-for="Category" class="form-control" id="category"  placeholder="Ex: Camisas">
+        </div>
+        
+        <div class="form-text text-muted">
+            <i class="bi bi-lightbulb"></i> Dica: Você pode cadastrar várias de uma vez separando por ponto e vírgula ( <strong>;</strong> )
         </div>
         
         <div class="btn-group" role="group">
@@ -19,3 +23,7 @@
         </div>
     </form>
 </div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

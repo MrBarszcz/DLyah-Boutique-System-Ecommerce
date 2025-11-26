@@ -18,6 +18,10 @@ public class SizeRepository : ISizeRepository {
         return _context.Sizes.FirstOrDefault(x => x.SizeId == id);
     }
 
+    public SizeModel FindByName( string name ) {
+        return _context.Sizes.FirstOrDefault(x => x.Size == name);
+    }
+
     public SizeModel Update(SizeModel size) { 
         SizeModel sizeDb = FindById(size.SizeId);
 
@@ -31,11 +35,13 @@ public class SizeRepository : ISizeRepository {
         return sizeDb;
     }
 
-    public SizeModel Create(SizeModel size) {
-        Console.WriteLine($"[DEBUG] Cadastrando tamanho: {size.Size}");
+    public SizeModel Add(SizeModel size) {
         _context.Sizes.Add(size);
-        _context.SaveChanges();
+        
         return size;
     }
 
+    public async Task<int> SaveChanges() {
+        return await _context.SaveChangesAsync();
+    }
 }

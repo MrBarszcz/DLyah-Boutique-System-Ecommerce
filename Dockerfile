@@ -17,4 +17,9 @@ COPY --from=build /app/publish .
 
 EXPOSE 8080
 
-ENTRYPOINT ["/bin/sh", "-c", "cp -r /app/wwwroot/* /app/wwwroot_volume/ && dotnet DLyah Boutique System.dll"]
+# --- ADICIONE ESTA LINHA PARA FORÇAR A CÓPIA ---
+# (Ajuste o caminho da origem se necessário, mas deve ser relativo à raiz do projeto onde está o Dockerfile)
+COPY ["DLyah Boutique System/wwwroot/js/advanced-uploader.js", "/app/wwwroot/js/"]
+# -----------------------------------------------
+
+ENTRYPOINT ["dotnet", "DLyah Boutique System.dll"]

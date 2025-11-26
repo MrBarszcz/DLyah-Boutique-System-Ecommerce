@@ -6,8 +6,30 @@
 
 <div class="text-center">
     <div class="text-end">
-        <a role="button" class="btn btn-primary" asp-controller="Category" asp-action="Register"><i class="bi bi-send-plus"></i></a>
+        <a role="button" class="btn btn-primary" asp-controller="Category" asp-action="Register"><i
+                class="bi bi-send-plus"></i></a>
     </div>
+
+    @if ( TempData[ "SuccessMessage" ] != null ) {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData[ "SuccessMessage" ]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if ( TempData[ "ErrorMessage" ] != null ) {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-x-octagon-fill me-2"></i> @TempData[ "ErrorMessage" ]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    
+    @if ( TempData[ "WarningMessage" ] != null ) {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData[ "WarningMessage" ]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
     <h1 class="display-4">Listagem de Categorias</h1>
 
@@ -15,30 +37,39 @@
 
     <table class="table">
         <thead>
-        <tr>
-            <th scope="col">#</th>
-            <th scope="col">Categoria</th>
-            <th scope="col">Cadastros</th>
-            <th scope="col"></th>
-        </tr>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Categoria</th>
+                <th scope="col">Cadastros</th>
+                <th scope="col"></th>
+            </tr>
         </thead>
         <tbody>
-            @if (Model != null && Model.Any()) { // If the list inherited from the model is not null and contains something
-                foreach (CategoryModel category in Model) { // Iterates through each item in the list of categories (Model)
+            @if ( Model != null && Model.Any() ) {  // If the list inherited from the model is not null and contains something
+               foreach ( CategoryModel category in Model ) { // Iterates through each item in the list of categories (Model)
                     <tr>
-                        <th scope="row">@category.CategoryId</th>
-                        <td>@category.Category</td>
-                        <td>
-                            <a href="javascript:" class="btn btn-success btn-total-products">10</a> @* Shows the number of clothes registered with this category, Open a modal that shows these clothes *@
-                        </td>
-                        <td>
-                            <div class="btn-group" role="group">
-                                <a role="button" class="btn btn-outline-primary" asp-route-id="@category.CategoryId" asp-controller="Category" asp-action="Edit"><i class="bi bi-pencil-fill"></i></a>
-                                <a role="button" class="btn btn-danger btn-delete-category" category-id="@category.CategoryId"><i class="bi bi-trash3"></i></a>
-                            </div>
-                        </td>
-                    </tr>
-                }
+                       <th scope="row">@category.CategoryId</th>
+                       <td>@category.Category</td>
+                       <td>
+                           <a href="javascript:"
+                              class="btn btn-success btn-total-products">10</a> @* Shows the number of clothes registered with this category, Open a modal that shows these clothes *@
+                       </td>
+                       <td>
+                           <div class="btn-group" role="group">
+                               <a role="button"
+                                  class="btn btn-outline-primary"
+                                  asp-route-id="@category.CategoryId"
+                                  asp-controller="Category"
+                                  asp-action="Edit"><i
+                                       class="bi bi-pencil-fill"></i></a>
+                               <a role="button"
+                                  class="btn btn-danger btn-delete-category"
+                                  category-id="@category.CategoryId"><i
+                                       class="bi bi-trash3"></i></a>
+                           </div>
+                       </td>
+                   </tr>
+               }
             }
         </tbody>
     </table>
@@ -112,7 +143,7 @@
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <button type="button" class="btn btn-danger">Excluir</button>
                     </div>
-                    
+
                 </div>
             </div>
         </div>

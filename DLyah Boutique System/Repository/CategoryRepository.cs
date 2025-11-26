@@ -20,6 +20,10 @@ public class CategoryRepository : ICategoryRepository {
         return _context.Categories.FirstOrDefault(x => x.CategoryId == id);
     }
 
+    public CategoryModel FindByName( string name ) {
+        return _context.Categories.FirstOrDefault(x => x.Category == name);
+    }
+
     // UPDATE
     public CategoryModel Update(CategoryModel category) {
         CategoryModel categoryDb = FindById(category.CategoryId);
@@ -35,13 +39,15 @@ public class CategoryRepository : ICategoryRepository {
     }
     
     // CREATE
-    public CategoryModel Create(CategoryModel category) {
+    public CategoryModel Add(CategoryModel category) {
         _context.Categories.Add(category);
-        _context.SaveChanges();
 
         return category;
     }
     
     // KILL
-    
+
+    public async Task<int> SaveChanges() {
+        return await _context.SaveChangesAsync();
+    }
 }

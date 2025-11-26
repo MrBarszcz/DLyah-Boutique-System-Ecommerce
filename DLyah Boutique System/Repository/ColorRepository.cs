@@ -18,6 +18,10 @@ public class ColorRepository : IColorRepository {
         return _context.Colors.FirstOrDefault(x => x.ColorId == id);
     }
 
+    public ColorModel FindByName( string name ) {
+        return _context.Colors.FirstOrDefault( x => x.Color == name );
+    }
+
     public ColorModel Update(ColorModel color) { 
         ColorModel colorDb = FindById(color.ColorId);
 

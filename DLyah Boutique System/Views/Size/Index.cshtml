@@ -6,8 +6,30 @@
 
 <div class="text-center">
     <div class="text-end">
-        <a role="button" class="btn btn-primary" asp-controller="Size" asp-action="Register"><i class="bi bi-send-plus"></i></a>
+        <a role="button" class="btn btn-primary" asp-controller="Size" asp-action="Register"><i
+                class="bi bi-send-plus"></i></a>
     </div>
+
+    @if ( TempData[ "SuccessMessage" ] != null ) {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData[ "SuccessMessage" ]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if ( TempData[ "ErrorMessage" ] != null ) {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-x-octagon-fill me-2"></i> @TempData[ "ErrorMessage" ]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if ( TempData[ "WarningMessage" ] != null ) {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData[ "WarningMessage" ]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
     <h1 class="display-4">Listagem de Tamanhos</h1>
 
@@ -23,8 +45,8 @@
         </tr>
         </thead>
         <tbody>
-        @if (Model != null && Model.Any()) {
-            foreach (SizeModel size in Model) {
+        @if ( Model != null && Model.Any() ) {
+            foreach ( SizeModel size in Model ) {
                 <tr>
                     <th scope="row">@size.SizeId</th>
                     <td>@size.Size</td>
@@ -33,8 +55,10 @@
                     </td>
                     <td>
                         <div class="btn-group" role="group">
-                            <a role="button" class="btn btn-outline-primary" asp-route-id="@size.SizeId" asp-controller="Size" asp-action="Edit"><i class="bi bi-pencil-fill"></i></a>
-                            <a role="button" class="btn btn-danger btn-delete-Size" Size-id="@size.SizeId"><i class="bi bi-trash3"></i></a>
+                            <a role="button" class="btn btn-outline-primary" asp-route-id="@size.SizeId"
+                               asp-controller="Size" asp-action="Edit"><i class="bi bi-pencil-fill"></i></a>
+                            <a role="button" class="btn btn-danger btn-delete-Size" Size-id="@size.SizeId"><i
+                                    class="bi bi-trash3"></i></a>
                         </div>
                     </td>
                 </tr>

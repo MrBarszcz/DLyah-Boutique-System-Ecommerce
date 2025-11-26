@@ -9,6 +9,27 @@
         <a role="button" class="btn btn-primary" asp-controller="Color" asp-action="Register"><i class="bi bi-send-plus"></i></a>
     </div>
 
+    @if ( TempData[ "SuccessMessage" ] != null ) {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData[ "SuccessMessage" ]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if ( TempData[ "ErrorMessage" ] != null ) {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-x-octagon-fill me-2"></i> @TempData[ "ErrorMessage" ]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if ( TempData[ "WarningMessage" ] != null ) {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData[ "WarningMessage" ]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    
     <h1 class="display-4">Listagem de Cores</h1>
 
     <br>

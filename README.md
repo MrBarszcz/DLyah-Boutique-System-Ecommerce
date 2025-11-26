@@ -24,7 +24,43 @@ Esta plataforma não é apenas um site, mas um sistema de gerenciamento de negó
 | **Containerização** | **Docker & Docker Compose** | Orquestração de todos os serviços (App, DB, Nginx). |
 | **Padrões** | **MVC, Repository, Service** | Separação de responsabilidades (SoC). |
 
----
+
+
+## 🛠️ Funcionalidades Avançadas (UX/UI Administrativo)
+
+O painel administrativo foi desenvolvido com foco na produtividade e usabilidade, implementando diversas melhorias de interface e lógica.
+
+**1. Upload de Imagens com Ordenação (Drag-and-Drop)**
+
+* O sistema utiliza um componente customizado (**AdvancedImageUploader.cshtml**) integrado à biblioteca **SortableJS**.
+ 
+* **Drag-and-Drop**: O administrador pode arrastar arquivos do computador para a zona de upload.
+
+* Ordenação Visual: As pré-visualizações das imagens podem ser reordenadas arrastando os cards.
+
+* Sincronia com Backend: A ordem visual definida no navegador é preservada no envio do formulário, garantindo que a ordem das fotos na galeria do produto (**ImageOrder**) seja exatamente a que o administrador definiu.
+
+**2. Atualização Dinâmica de Dropdowns (AJAX Refresh)**
+
+* Para evitar a perda de dados em formulários longos, implementamos um sistema de atualização assíncrona.
+
+  * Cenário: O usuário está cadastrando um produto e percebe que falta uma "Categoria". Ele clica em "Nova Categoria", cadastra em uma nova aba e fecha.
+
+  * Solução: Ao clicar no botão de Refresh (↻) ao lado do dropdown, o sistema busca via **AJAX (fetch)** a lista atualizada no servidor e recria as opções do dropdown instantaneamente, sem recarregar a página e sem perder os dados já preenchidos.
+
+**3. Padronização de Texto (StringExtensions)**
+
+* Para manter a consistência dos dados, foi implementada uma extensão customizada **StringExtensions** que aplica regras específicas por tipo de dado:
+
+    * Categorias e Cores (**Title Case**): Passam por uma normalização que aplica Title Case (Primeira Letra Maiúscula) baseada na cultura **pt-BR**. Ex: "camisas" -> "Camisas".
+
+    * Tamanhos (**UpperCase**): São padronizados automaticamente para maiúsculas. Ex: "xl" -> "XL", "p" -> "P".
+
+**4. Gerador de Estoque Dinâmico**
+
+* A interface de cadastro de produtos possui inteligência para gerar SKUs.
+
+    * Ao selecionar Cores e Tamanhos, um script (**product-registration.js**) gera automaticamente uma matriz de inputs para a definição de estoque de cada combinação (ex: "Azul - M", "Azul - G").
 
 ## 📐 Arquitetura da Infraestrutura (Docker)
 
@@ -119,8 +155,7 @@ Estes fluxos demonstram como os domínios e a infraestrutura colaboram.
 3.  **Página do Produto:** O `ProductController` busca o `Product` e todas as suas `ProductVariants` e `AttributeValues`.
 4.  **Frontend (UI):** O JavaScript na View usa os `AttributeValues` para renderizar os *swatches* de cor (círculos coloridos) usando os dados do `HexCode`.
 5.  **Seleção:** O cliente seleciona "Rosa" e "M". O JS identifica o `ProductVariantId` correto.
-6.  **Carrinho:** A `ProductVariantId` é enviada via `POST` para o `CartController/Add`.
-7.  **Checkout:** Um `Order` é criado a partir dos itens do `Cart`, salvando um `OrderItem` com o preço daquele momento.
+
 
 ## 🗺️ Próximos Passos (Roadmap)
 

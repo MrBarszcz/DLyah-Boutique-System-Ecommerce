@@ -1,185 +1,279 @@
 @model DLyah_Boutique_System.ViewModels.ProductRegisterViewModel
 
 @{
+    ViewData[ "Title" ] = "Cadastrar Produto";
     Layout = "_Layout";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Cadastrar Produto</h1>
+<div class="container mt-4" style="max-width: 800px;">
+    <h1 class="display-4 text-center mb-4">Cadastrar Produto</h1>
 
     <form asp-controller="Product" asp-action="Register" method="post" enctype="multipart/form-data" id="productForm">
         @Html.AntiForgeryToken()
-        
-        <div class="form-group">
-            <label class="control-label">Imagens do Produto</label>
-            <input type="file" asp-for="PImages" id="productImagesInput" class="form-control" multiple accept="image/*"/>
-            <div id="imagePreviewContainer" class="row mt-3">
-                @if (ViewBag.ImagePreviews != null) {
-                    for (var i = 0; i < ((List<string>)ViewBag.ImagePreviews).Count; i++) {
-                        <div class="image-preview-container" draggable="true" data-index="@i">
-                            <img alt="" class="image-preview" src="@((List<string>)ViewBag.ImagePreviews)[i]"/>
+
+        <!-- 1. COMPONENTE DE IMAGENS -->
+        <div class="card mb-4 border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom fw-bold text-center">Imagens do Produto</div>
+            <div class="card-body">
+                @await Html.PartialAsync( "~/Views/Shared/Components/Images/AdvancedImageUploader.cshtml" )
+            </div>
+        </div>
+
+        <!-- 2. DADOS BÁSICOS -->
+        <div class="card mb-4 border-0 shadow-sm">
+            <div class="card-body">
+                <div class="form-group mb-3">
+                    <label asp-for="ProductName"
+                           class="form-label text-muted small text-uppercase fw-bold d-block text-center">Nome do
+                        Produto</label>
+                    <input asp-for="ProductName" class="form-control form-control-lg text-center"
+                           placeholder="Ex: Camisa Regular"/>
+                    <div class="text-center"><span asp-validation-for="ProductName" class="text-danger"></span></div>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="ProductDescription"
+                           class="form-label text-muted small text-uppercase fw-bold d-block text-center">Descrição</label>
+                    <textarea asp-for="ProductDescription" class="form-control text-center" rows="3"
+                              placeholder="Descrição detalhada..."></textarea>
+                    <div class="text-center"><span asp-validation-for="ProductDescription" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group mb-3 text-center">
+                    <label asp-for="ProductPrice"
+                           class="form-label text-muted small text-uppercase fw-bold">Valor</label>
+                    <div class="d-flex justify-content-center">
+                        <div class="input-group input-group-lg" style="max-width: 250px;">
+                            <span class="input-group-text bg-transparent border-end-0">R$</span>
+                            <input type="number" asp-for="ProductPrice" class="form-control border-start-0 text-start"
+                                   min="0" step="0.01" placeholder="0,00"/>
                         </div>
-                    }
-                }
+                    </div>
+                    <span asp-validation-for="ProductPrice" class="text-danger"></span>
+                </div>
             </div>
         </div>
 
+        <!-- 3. ATRIBUTOS -->
+        <div class="card mb-4 border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom fw-bold text-center">Atributos</div>
+            <div class="card-body">
 
-        <div class="form-group p-2">
-            <label for="name" class="control-label">Nome do Produto</label>
-            <input asp-for="ProductName" class="form-control" id="name" placeholder="Camisa Regular Em Sarja"/>
+                <!-- Container centralizado para garantir alinhamento vertical -->
+                <div class="mx-auto" style="max-width: 500px;">
+
+                    <!-- GÊNERO -->
+                    <div class="form-group mb-4">
+                        <label
+                            class="form-label d-block text-center text-muted small text-uppercase fw-bold">Gênero</label>
+                        <div class="dropdown d-grid">
+                            <!-- d-grid faz o botão ocupar 100% da largura do container pai -->
+                            <button class="btn btn-outline-secondary dropdown-toggle text-start px-3" type="button"
+                                    data-bs-toggle="dropdown">
+                                Selecione o Gênero
+                            </button>
+                            <ul class="dropdown-menu w-100 text-center">
+                                @if ( Model.AvailableGenders != null ) {
+                                    foreach ( var gender in Model.AvailableGenders ) {
+                                        <li>
+                                            <div
+                                                class="form-check d-flex justify-content-center align-items-center py-1">
+                                                <input type="radio" class="form-check-input me-2" asp-for="GenderId"
+                                                       value="@gender.GenderId" id="g_@gender.GenderId"/>
+                                                <label class="form-check-label cursor-pointer"
+                                                       for="g_@gender.GenderId">@gender.Gender</label>
+                                            </div>
+                                        </li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                        <div class="text-center"><span asp-validation-for="GenderId" class="text-danger"></span></div>
+                    </div>
+
+                    <!-- CATEGORIAS -->
+                    <div class="form-group mb-4">
+                        <label
+                            class="form-label d-block text-center text-muted small text-uppercase fw-bold">Categorias</label>
+                        <div class="input-group">
+                            <!-- Dropdown cresce para preencher espaço -->
+                            <button class="btn btn-outline-secondary dropdown-toggle flex-grow-1 text-start px-3"
+                                    type="button" data-bs-toggle="dropdown">
+                                Selecionar Categorias
+                            </button>
+                            <ul class="dropdown-menu w-100" id="listCategories">
+                                @if ( Model.AvailableCategories != null ) {
+                                    foreach ( var cat in Model.AvailableCategories ) {
+                                        <li>
+                                            <div class="form-check ms-3">
+                                                <input type="checkbox" class="form-check-input"
+                                                       name="SelectedCategories" value="@cat.CategoryId"
+                                                       id="c_@cat.CategoryId"
+                                                       @( Model.SelectedCategories?.Contains( cat.CategoryId ) == true ? "checked" : "" )/>
+                                                <label class="form-check-label"
+                                                       for="c_@cat.CategoryId">@cat.Category</label>
+                                            </div>
+                                        </li>
+                                    }
+                                }
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item text-primary text-center" asp-controller="Category"
+                                       asp-action="Register" target="_blank">+ Nova Categoria</a></li>
+                            </ul>
+                            <!-- Botão de refresh integrado ao input-group -->
+                            <button type="button" class="btn btn-outline-secondary px-3"
+                                    onclick="refreshData('Categories')" title="Atualizar Lista">
+                                ↻
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- CORES -->
+                    <div class="form-group mb-4">
+                        <label
+                            class="form-label d-block text-center text-muted small text-uppercase fw-bold">Cores</label>
+                        <div class="input-group">
+                            <button class="btn btn-outline-secondary dropdown-toggle flex-grow-1 text-start px-3"
+                                    type="button" data-bs-toggle="dropdown">
+                                Selecionar Cores
+                            </button>
+                            <ul class="dropdown-menu w-100" id="listColors">
+                                @if ( Model.AvailableColors != null ) {
+                                    foreach ( var col in Model.AvailableColors ) {
+                                        <li>
+                                            <div class="form-check ms-3">
+                                                <input type="checkbox" class="form-check-input stock-trigger-color"
+                                                       name="SelectedColors" value="@col.ColorId" id="co_@col.ColorId"
+                                                       data-name="@col.Color"
+                                                       @( Model.SelectedColors?.Contains( col.ColorId ) == true ? "checked" : "" )/>
+                                                <label class="form-check-label" for="co_@col.ColorId">
+                                                    <div
+                                                        class="color-box d-inline-block me-2 border rounded-circle align-middle"
+                                                        style="width:16px;height:16px;background-color:@col.HexColor;"></div>
+                                                    @col.Color
+                                                </label>
+                                            </div>
+                                        </li>
+                                    }
+                                }
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item text-primary text-center" asp-controller="Color"
+                                       asp-action="Register" target="_blank">+ Nova Cor</a></li>
+                            </ul>
+                            <button type="button" class="btn btn-outline-secondary px-3" onclick="refreshData('Colors')"
+                                    title="Atualizar Lista">
+                                ↻
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- TAMANHOS -->
+                    <div class="form-group mb-2">
+                        <label
+                            class="form-label d-block text-center text-muted small text-uppercase fw-bold">Tamanhos</label>
+                        <div class="input-group">
+                            <button class="btn btn-outline-secondary dropdown-toggle flex-grow-1 text-start px-3"
+                                    type="button" data-bs-toggle="dropdown">
+                                Selecionar Tamanhos
+                            </button>
+                            <ul class="dropdown-menu w-100" id="listSizes">
+                                @if ( Model.AvailableSizes != null ) {
+                                    foreach ( var siz in Model.AvailableSizes ) {
+                                        <li>
+                                            <div class="form-check ms-2">
+                                                <input type="checkbox" class="form-check-input stock-trigger-size"
+                                                       name="SelectedSizes" value="@siz.SizeId" id="s_@siz.SizeId"
+                                                       data-name="@siz.Size"
+                                                       @( Model.SelectedSizes?.Contains( siz.SizeId ) == true ? "checked" : "" )/>
+                                                <label class="form-check-label" for="s_@siz.SizeId">@siz.Size</label>
+                                            </div>
+                                        </li>
+                                    }
+                                }
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item text-primary text-center" asp-controller="Size"
+                                       asp-action="Register" target="_blank">+ Novo Tamanho</a></li>
+                            </ul>
+                            <button type="button" class="btn btn-outline-secondary px-3" onclick="refreshData('Sizes')"
+                                    title="Atualizar Lista">
+                                ↻
+                            </button>
+                        </div>
+                    </div>
+                </div> <!-- Fim do container centralizado -->
+
+            </div>
         </div>
 
-        <div class="form-group p-2">
-            <label for="description" class="control-label">Descrição Curta</label>
-            <textarea asp-for="ProductDescription" class="form-control" id="description"
-                      placeholder="Essa camisa regular em sarja oferece um visual clássico e confortável, ideal para diversas ocasiões. O tecido de sarja proporciona um toque macio e durabilidade, enquanto a modelagem regular garante um caimento solto e elegante."></textarea>
-        </div>
+        <!-- 4. ÁREA DE ESTOQUE -->
+        <div class="card mb-4 border-primary shadow-sm">
+            <div class="card-header bg-primary text-white text-center fw-bold">Estoque por Variação</div>
+            <div class="card-body bg-light">
 
-        <div class="form-group p-2">
-            <label for="price" class="control-label">Valor</label>
-            <input type="number" min="0" step=".01" asp-for="ProductPrice" class="form-control" id="price"/>
-        </div>
+                <div class="mx-auto" style="max-width: 600px;">
+                    <!-- Container do estoque -->
+                    <div id="stockInputsContainer" class="row g-2 justify-content-center">
+                        <!-- O JavaScript vai inserir os itens aqui -->
+                    </div>
+                </div>
 
-        <div class="form-group">
-            <div class="dropdown p-2">
-                <button class="btn btn-light dropdown-toggle" type="button" id="dropdownGender"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                    Selecionar Gênero
-                </button>
-                <span asp-validation-for="GenderId" class="text-danger"></span> @* Validação para o campo Gênero *@
-                <ul class="dropdown-menu" aria-labelledby="dropdownGender">
-                    @if (Model.AvailableGenders != null && Model.AvailableGenders.Any()) {
-                        foreach (var gender in Model.AvailableGenders) {
-                            <li>
-                                <div class="form-check ms-2">
-                                    <input type="radio" class="form-check-input" asp-for="GenderId" value="@gender.GenderId" id="gender_@gender.GenderId"/>
-                                    <label class="form-check-label" for="gender_@gender.GenderId">@gender.Gender</label>
+                <!-- TEMPLATE PARA CADA ITEM DE ESTOQUE -->
+                <!-- Isso define o visual: Um item embaixo do outro (col-12) com a cor em destaque -->
+                <template id="stockInputTemplate">
+                    <div class="col-12 fade-in-animation">
+                        <div class="d-flex align-items-center p-2 border rounded bg-white shadow-sm h-100">
+
+                            <!-- Lado Esquerdo: Identificação Visual da Cor -->
+                            <div class="d-flex align-items-center flex-grow-1 ps-2">
+                                <!-- A cor será aplicada aqui via JS -->
+                                <div class="stock-color-preview rounded-circle shadow-sm border me-3"
+                                     style="width: 32px; height: 32px;"></div>
+
+                                <div class="d-flex flex-column justify-content-center">
+                                    <div class="fw-bold text-dark stock-label-color" style="line-height: 1.2;">Nome da
+                                        Cor
+                                    </div>
+                                    <div class="text-muted small stock-label-size">Tamanho X</div>
                                 </div>
-                            </li>
-                        }
-                    } else {
-                        <li>
-                            <span class="dropdown-item">Nenhum gênero cadastrado</span>
-                        </li>
-                    }
-                </ul>
+                            </div>
+
+                            <!-- Inputs Ocultos para o Model Binding -->
+                            <input type="hidden" class="stock-input-color-id">
+                            <input type="hidden" class="stock-input-size-id">
+
+                            <!-- Lado Direito: Input de Quantidade -->
+                            <div class="input-group" style="width: 140px;">
+                                <span class="input-group-text bg-light border-end-0 text-muted small">Qtd.</span>
+                                <input type="number"
+                                       class="form-control text-center fw-bold border-start-0 stock-input-qty"
+                                       min="0"
+                                       placeholder="0"/>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
             </div>
         </div>
 
-        <div class="form-group">
-            <div class="dropdown p-2">
-                <button class="btn btn-light dropdown-toggle" type="button" id="dropdownCategories"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                    Selecionar Categorias
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownCategories">
-                    @if (Model.AvailableCategories != null && Model.AvailableCategories.Any()) {
-                        foreach (var category in Model.AvailableCategories) {
-                            <li>
-                                <div class="form-check ms-2">
-                                    <input type="checkbox" class="form-check-input" name="SelectedCategories"
-                                           value="@category.CategoryId" id="category_@category.CategoryId"
-                                           @(Model.SelectedCategories != null && Model.SelectedCategories.Contains(category.CategoryId) ? "checked" : "")/>
-                                    <label class="form-check-label" for="category_@category.CategoryId">@category.Category</label>
-                                </div>
-                            </li>
-                        }
-                    } else {
-                        // ...
-                    }
-                    <li>
-                        <a role="button" class="btn" asp-controller="Category" asp-action="Register">cadastrar</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="dropdown p-2">
-                <button class="btn btn-light dropdown-toggle" type="button" id="dropdownColors"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                    Selecionar Cores
-                </button>
-                @* Para exibir erros de validação relacionados à seleção de cores (ex: se for obrigatório selecionar ao menos uma),
-                   você pode ter um [Required] na propriedade SelectedColors da ViewModel,
-                   e o ValidationSummary ou um span customizado pegaria o erro.
-                   Ex: <span asp-validation-for="SelectedColors" class="text-danger"></span> (Pode precisar de ajustes para listas) *@
-                <ul class="dropdown-menu" aria-labelledby="dropdownColors">
-                    @if (Model.AvailableColors != null && Model.AvailableColors.Any()) {
-                        foreach (var color in Model.AvailableColors) {
-                            <li>
-                                <div class="form-check ms-2">
-                                    <input type="checkbox" class="form-check-input" name="SelectedColors"
-                                           value="@color.ColorId" id="color_@color.ColorId"
-                                           @(Model.SelectedColors != null && Model.SelectedColors.Contains(color.ColorId) ? "checked" : "")/>
-                                    <label class="form-check-label" for="color_@color.ColorId">
-                                        <div class="color-box color-s"
-                                             style="background-color: @color.HexColor"></div>
-                                        @color.Color
-                                    </label>
-                                </div>
-                            </li>
-                        }
-                    } else {
-                        <li>
-                            <span class="dropdown-item">Nenhuma cor cadastrada</span>
-                        </li>
-                    }
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
-                    <li>
-                        <a role="button" class="btn dropdown-item" asp-controller="Color" asp-action="Register">Cadastrar Nova Cor</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="dropdown p-2">
-                <button class="btn btn-light dropdown-toggle" type="button" id="dropdownSizes"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                    Selecionar Tamanhos
-                </button>
-                @* Validação para SelectedSizes, se necessário *@
-                <ul class="dropdown-menu" aria-labelledby="dropdownSizes">
-                    @if (Model.AvailableSizes != null && Model.AvailableSizes.Any()) {
-                        foreach (var size in Model.AvailableSizes) {
-                            <li>
-                                <div class="form-check ms-2">
-                                    <input type="checkbox" class="form-check-input" name="SelectedSizes"
-                                           value="@size.SizeId" id="size_@size.SizeId"
-                                           @(Model.SelectedSizes != null && Model.SelectedSizes.Contains(size.SizeId) ? "checked" : "")/>
-                                    <label class="form-check-label" for="size_@size.SizeId">@size.Size</label>
-                                </div>
-                            </li>
-                        }
-                    } else {
-                        <li>
-                            <span class="dropdown-item">Nenhum tamanho cadastrado</span>
-                        </li>
-                    }
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
-                    <li>
-                        <a role="button" class="btn dropdown-item" asp-controller="Size" asp-action="Register">Cadastrar Novo Tamanho</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div id="stockInputsContainer">
-            </div>
-        </div>
-
-        <div class="form-group">
-            <a role="button" class="btn btn-secondary" asp-controller="Product" asp-action="Index">Cancelar</a>
-            <button type="submit" class="btn btn-primary">Enviar</button>
+        <div class="d-flex justify-content-center gap-3 mb-5">
+            <a class="btn btn-outline-secondary px-4 rounded-pill" asp-controller="Product"
+               asp-action="Index">Cancelar</a>
+            <button type="submit" class="btn btn-success px-5 rounded-pill fw-bold shadow">Salvar Produto</button>
         </div>
     </form>
 </div>
 
-
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="~/js/advanced-uploader.js" asp-append-version="true"></script>
+    <script src="~/js/product-registration.js" asp-append-version="true"></script>
+    @{ await Html.RenderPartialAsync( "_ValidationScriptsPartial" ); }
+}
