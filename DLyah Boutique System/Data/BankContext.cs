@@ -20,9 +20,9 @@ public class BankContext : IdentityDbContext<UserModel, IdentityRole<int>, int> 
     public DbSet<PaymentModel> Payments { get; set; } = null!;
     public DbSet<OrderItemModel> OrderItems { get; set; } = null!;
     public DbSet<AddressModel> Addresses { get; set; } = null!;
+    public DbSet<ProductCategoryModel> ProductCategories { get; set; } = null!;
     public DbSet<ProductColorModel> ProductColors { get; set; } = null!;
     public DbSet<ProductSizeModel> ProductSizes { get; set; } = null!;
-    public DbSet<ProductCategoryModel> ProductCategories { get; set; } = null!;
     public DbSet<UserPaymentModel> UserPayments { get; set; } = null!;
     public DbSet<UserProfileImageModel> UserProfileImages { get; set; } = null!;
     public DbSet<ProductImageModel> ProductImages { get; set; } = null!;
@@ -32,43 +32,10 @@ public class BankContext : IdentityDbContext<UserModel, IdentityRole<int>, int> 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         base.OnModelCreating(modelBuilder);
-        
-        modelBuilder.Entity<UserModel>()
-            .ToTable("Users");
-        modelBuilder.Entity<ClientModel>()
-            .ToTable("Clients");
-        modelBuilder.Entity<GenderModel>()
-            .ToTable("Gender"); // Usar o nome correto da tabela
-        modelBuilder.Entity<ProductModel>()
-            .ToTable("Products");
-        modelBuilder.Entity<SizeModel>()
-            .ToTable("Sizes");
-        modelBuilder.Entity<ColorModel>()
-            .ToTable("Colors");
-        modelBuilder.Entity<CategoryModel>()
-            .ToTable("Categories");
-        modelBuilder.Entity<OrderModel>()
-            .ToTable("Orders");
-        modelBuilder.Entity<PaymentModel>()
-            .ToTable("Payments");
-        modelBuilder.Entity<OrderItemModel>()
-            .ToTable("OrderItems");
-        modelBuilder.Entity<AddressModel>()
-            .ToTable("Address"); // Usar o nome correto da tabela
-        modelBuilder.Entity<ProductColorModel>()
-            .ToTable("ProductColors");
-        modelBuilder.Entity<ProductSizeModel>()
-            .ToTable("ProductSizes");
-        modelBuilder.Entity<ProductCategoryModel>()
-            .ToTable("ProductCategories");
-        modelBuilder.Entity<UserPaymentModel>()
-            .ToTable("UserPayments");
-        modelBuilder.Entity<UserProfileImageModel>()
-            .ToTable("UserProfileImages");
-        modelBuilder.Entity<ProductImageModel>()
-            .ToTable("ProductImages");
-        modelBuilder.Entity<StockProductModel>()
-            .ToTable("StockProducts");
+
+        // Aplica todas as configurações de IEntityTypeConfiguration do assembly atual.
+        // Isso carrega ProductConfiguration, ProductImageConfiguration, etc. automaticamente.
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(BankContext).Assembly);
 
         // Configurações de chave primária e nomes de coluna (se necessário para corresponder ao SQL)
         modelBuilder.Entity<StockProductModel>()
@@ -76,7 +43,7 @@ public class BankContext : IdentityDbContext<UserModel, IdentityRole<int>, int> 
 
         modelBuilder.Entity<StockProductModel>()
             .Property(sp => sp.StockId)
-            .HasColumnName("stock_prduct_id"); // Especifica o nome da coluna da chave primária
+            .HasColumnName("stock_product_id"); // Especifica o nome da coluna da chave primária
 
         modelBuilder.Entity<StockProductModel>()
             .Property(si => si.ProductId)
@@ -126,6 +93,45 @@ public class BankContext : IdentityDbContext<UserModel, IdentityRole<int>, int> 
             .HasDatabaseName("UQ_StockItem_ProductColorSize") // Especifica o nome do índice único
             .IsUnique();
 
+        modelBuilder.Entity<ProductCategoryModel>()
+            .HasKey(pc => new { pc.ProductId, pc.CategoryId });
+
+        modelBuilder.Entity<ProductCategoryModel>()
+            .HasOne(pc => pc.Product)
+            .WithMany(p => p.ProductCategories)
+            .HasForeignKey(pc => pc.ProductId);
+
+        modelBuilder.Entity<ProductCategoryModel>()
+            .HasOne(pc => pc.Category)
+            .WithMany() // CategoryModel não precisa de uma coleção de volta para a tabela de junção
+            .HasForeignKey(pc => pc.CategoryId);
+
+        modelBuilder.Entity<ProductColorModel>()
+            .HasKey(pc => new { pc.ProductId, pc.ColorId });
+
+        modelBuilder.Entity<ProductColorModel>()
+            .HasOne(pc => pc.Product)
+            .WithMany(p => p.ProductColors)
+            .HasForeignKey(pc => pc.ProductId);
+
+        modelBuilder.Entity<ProductColorModel>()
+            .HasOne(pc => pc.Color)
+            .WithMany()
+            .HasForeignKey(pc => pc.ColorId);
+
+        modelBuilder.Entity<ProductSizeModel>()
+            .HasKey(ps => new { ps.ProductId, ps.SizeId });
+
+        modelBuilder.Entity<ProductSizeModel>()
+            .HasOne(ps => ps.Product)
+            .WithMany(p => p.ProductSizes)
+            .HasForeignKey(ps => ps.ProductId);
+
+        modelBuilder.Entity<ProductSizeModel>()
+            .HasOne(ps => ps.Size)
+            .WithMany()
+            .HasForeignKey(ps => ps.SizeId);
+
         modelBuilder.Entity<CategoryModel>()
             .HasKey(c => c.CategoryId);
         modelBuilder.Entity<CategoryModel>()
@@ -137,11 +143,6 @@ public class BankContext : IdentityDbContext<UserModel, IdentityRole<int>, int> 
             .HasColumnName("category")
             .IsRequired()
             .HasMaxLength(100);
-        modelBuilder.Entity<CategoryModel>()
-            .HasMany(c => c.ProductCategories)
-            .WithOne(pc => pc.Category)
-            .HasForeignKey(pc => pc.CategoryId)
-            .HasConstraintName("FK_ProductCategory_Category");
 
         modelBuilder.Entity<UserProfileImageModel>()
             .HasKey(upi => upi.UserImageId);
@@ -188,124 +189,16 @@ public class BankContext : IdentityDbContext<UserModel, IdentityRole<int>, int> 
             .HasConstraintName("FK_UserPayment_Payment")
             .OnDelete(DeleteBehavior.NoAction);
 
-        modelBuilder.Entity<ProductImageModel>()
-            .HasKey(pi => pi.ProductImageId);
-        modelBuilder.Entity<ProductImageModel>()
-            .Property(pi => pi.ProductImageId)
-            .HasColumnName("prduct_image_id");
-        modelBuilder.Entity<ProductImageModel>()
-            .Property(pi => pi.ProductId)
-            .HasColumnName("product_id");
-        modelBuilder.Entity<ProductImageModel>()
-            .Property(pi => pi.ProductImagePath)
-            .HasColumnName("product_image_path")
-            .IsRequired()
-            .HasMaxLength(255);
-        modelBuilder.Entity<ProductImageModel>()
-            .Property(pi => pi.ImageOrder)
-            .HasColumnName("ImageOrder");
-        modelBuilder.Entity<ProductImageModel>()
-            .HasOne(pi => pi.Product)
-            .WithMany(p => p.ProductImages)
-            .HasForeignKey(pi => pi.ProductId)
-            .HasConstraintName("FK_ProductImage_Product");
-
-        modelBuilder.Entity<ProductSizeModel>()
-            .HasKey(
-                ps => new {
-                    ps.ProductId,
-                    ps.SizeId
-                }
-            );
-        modelBuilder.Entity<ProductSizeModel>()
-            .Property(ps => ps.ProductId)
-            .HasColumnName("product_id");
-        modelBuilder.Entity<ProductSizeModel>()
-            .Property(ps => ps.SizeId)
-            .HasColumnName("size_id");
-        modelBuilder.Entity<ProductSizeModel>()
-            .HasOne(ps => ps.Product)
-            .WithMany(p => p.ProductSizes)
-            .HasForeignKey(ps => ps.ProductId)
-            .HasConstraintName("FK_ProductSize_Product");
-        modelBuilder.Entity<ProductSizeModel>()
-            .HasOne(ps => ps.Size)
-            .WithMany(s => s.ProductSizes)
-            .HasForeignKey(ps => ps.SizeId)
-            .HasConstraintName("FK_ProductSize_Size");
-
-        modelBuilder.Entity<ProductCategoryModel>()
-            .HasKey(
-                pc => new {
-                    pc.ProductId,
-                    pc.CategoryId
-                }
-            );
-        modelBuilder.Entity<ProductCategoryModel>()
-            .Property(pc => pc.ProductId)
-            .HasColumnName("product_id");
-        modelBuilder.Entity<ProductCategoryModel>()
-            .Property(pc => pc.CategoryId)
-            .HasColumnName("category_id");
-        modelBuilder.Entity<ProductCategoryModel>()
-            .HasOne(pc => pc.Product)
-            .WithMany(p => p.ProductCategories)
-            .HasForeignKey(pc => pc.ProductId)
-            .HasConstraintName("FK_ProductCategory_Product");
-        modelBuilder.Entity<ProductCategoryModel>()
-            .HasOne(pc => pc.Category)
-            .WithMany(c => c.ProductCategories)
-            .HasForeignKey(pc => pc.CategoryId)
-            .HasConstraintName("FK_ProductCategory_Category");
-
-        modelBuilder.Entity<ProductColorModel>()
-            .HasKey(
-                pc => new {
-                    pc.ProductId,
-                    pc.ColorId
-                }
-            );
-        modelBuilder.Entity<ProductColorModel>()
-            .Property(pc => pc.ProductId)
-            .HasColumnName("product_id");
-        modelBuilder.Entity<ProductColorModel>()
-            .Property(pc => pc.ColorId)
-            .HasColumnName("color_id");
-        modelBuilder.Entity<ProductColorModel>()
-            .HasOne(pc => pc.Product)
-            .WithMany(p => p.ProductColors)
-            .HasForeignKey(pc => pc.ProductId)
-            .HasConstraintName("FK_ProductColor_Product");
-        modelBuilder.Entity<ProductColorModel>()
-            .HasOne(pc => pc.Color)
-            .WithMany(c => c.ProductColors)
-            .HasForeignKey(pc => pc.ColorId)
-            .HasConstraintName("FK_ProductColor_Color");
-
-        modelBuilder.Entity<UserModel>()
-            .HasKey(u => u.UserId);
-        modelBuilder.Entity<UserModel>()
-            .Property(u => u.UserId)
-            .HasColumnName("user_id");
         modelBuilder.Entity<UserModel>()
             .Property(u => u.UserNameComplete)
             .HasColumnName("user_name_complete")
             .IsRequired()
             .HasMaxLength(100);
         modelBuilder.Entity<UserModel>()
-            .Property(u => u.Username)
+            .Property(u => u.UserName)
             .HasColumnName("username")
             .IsRequired()
             .HasMaxLength(100);
-        modelBuilder.Entity<UserModel>()
-            .Property(u => u.UserEmail)
-            .HasColumnName("user_email")
-            .IsRequired()
-            .HasMaxLength(100);
-        modelBuilder.Entity<UserModel>()
-            .HasIndex(u => u.UserEmail)
-            .HasDatabaseName("IX_Users_user_email")
-            .IsUnique(); // Explicitly name the index
         modelBuilder.Entity<UserModel>()
             .Property(u => u.UserType)
             .HasColumnName("user_type")
@@ -320,11 +213,6 @@ public class BankContext : IdentityDbContext<UserModel, IdentityRole<int>, int> 
             .WithOne(c => c.User)
             .HasForeignKey<ClientModel>(c => c.UserId)
             .HasConstraintName("FK_UserID");
-        modelBuilder.Entity<UserModel>()
-            .HasMany(u => u.Addresses)
-            .WithOne(a => a.User)
-            .HasForeignKey(a => a.UserId)
-            .HasConstraintName("FK_Address_User");
         modelBuilder.Entity<UserModel>()
             .HasMany(u => u.UserPayments)
             .WithOne(up => up.User)
@@ -417,70 +305,6 @@ public class BankContext : IdentityDbContext<UserModel, IdentityRole<int>, int> 
             .HasIndex(g => g.Gender)
             .HasDatabaseName("IX_Gender_gender")
             .IsUnique(); // Explicitly name the index
-        modelBuilder.Entity<GenderModel>()
-            .HasMany(g => g.Products)
-            .WithOne(p => p.Gender)
-            .HasForeignKey(p => p.GenderId)
-            .HasConstraintName("FK_Product_Gender");
-
-        modelBuilder.Entity<ProductModel>()
-            .HasKey(p => p.ProductId);
-        modelBuilder.Entity<ProductModel>()
-            .Property(p => p.ProductId)
-            .HasColumnName("product_id");
-        modelBuilder.Entity<ProductModel>()
-            .Property(p => p.ProductName)
-            .HasColumnName("product_name")
-            .IsRequired()
-            .HasMaxLength(100);
-        modelBuilder.Entity<ProductModel>()
-            .Property(p => p.ProductDescription)
-            .HasColumnName("product_description")
-            .IsRequired()
-            .HasMaxLength(255);
-        modelBuilder.Entity<ProductModel>()
-            .Property(p => p.ProductPrice)
-            .HasColumnName("product_price")
-            .IsRequired()
-            .HasColumnType("DECIMAL(10, 2)");
-        modelBuilder.Entity<ProductModel>()
-            .Property(p => p.ProductQuantity)
-            .HasColumnName("product_quantity");
-        modelBuilder.Entity<ProductModel>()
-            .Property(p => p.GenderId)
-            .HasColumnName("gender_id")
-            .IsRequired();
-        modelBuilder.Entity<ProductModel>()
-            .HasOne(p => p.Gender)
-            .WithMany(g => g.Products)
-            .HasForeignKey(p => p.GenderId)
-            .HasConstraintName("FK_Product_Gender");
-        modelBuilder.Entity<ProductModel>()
-            .HasMany(p => p.OrderItems)
-            .WithOne(oi => oi.Product)
-            .HasForeignKey(oi => oi.ProductId)
-            .HasConstraintName("FK_OrderItem_Product")
-            .OnDelete(DeleteBehavior.NoAction);
-        modelBuilder.Entity<ProductModel>()
-            .HasMany(p => p.ProductColors)
-            .WithOne(pc => pc.Product)
-            .HasForeignKey(pc => pc.ProductId)
-            .HasConstraintName("FK_ProductColor_Product");
-        modelBuilder.Entity<ProductModel>()
-            .HasMany(p => p.ProductSizes)
-            .WithOne(ps => ps.Product)
-            .HasForeignKey(ps => ps.ProductId)
-            .HasConstraintName("FK_ProductSize_Product");
-        modelBuilder.Entity<ProductModel>()
-            .HasMany(p => p.ProductCategories)
-            .WithOne(pc => pc.Product)
-            .HasForeignKey(pc => pc.ProductId)
-            .HasConstraintName("FK_ProductCategory_Product");
-        modelBuilder.Entity<ProductModel>()
-            .HasMany(p => p.ProductImages)
-            .WithOne(pi => pi.Product)
-            .HasForeignKey(pi => pi.ProductId)
-            .HasConstraintName("FK_ProductImage_Product");
 
         modelBuilder.Entity<SizeModel>()
             .HasKey(s => s.SizeId);
@@ -495,12 +319,7 @@ public class BankContext : IdentityDbContext<UserModel, IdentityRole<int>, int> 
         modelBuilder.Entity<SizeModel>()
             .HasIndex(s => s.Size)
             .HasDatabaseName("IX_Sizes_size")
-            .IsUnique(); // Explicitly name the index
-        modelBuilder.Entity<SizeModel>()
-            .HasMany(s => s.ProductSizes)
-            .WithOne(ps => ps.Size)
-            .HasForeignKey(ps => ps.SizeId)
-            .HasConstraintName("FK_ProductSize_Size");
+            .IsUnique();
 
         modelBuilder.Entity<ColorModel>()
             .HasKey(c => c.ColorId);
@@ -524,19 +343,10 @@ public class BankContext : IdentityDbContext<UserModel, IdentityRole<int>, int> 
         modelBuilder.Entity<ColorModel>()
             .HasIndex(c => c.HexColor)
             .HasDatabaseName("IX_Colors_hex_color")
-            .IsUnique(); // Explicitly name the index
-        modelBuilder.Entity<ColorModel>()
-            .HasMany(c => c.ProductColors)
-            .WithOne(pc => pc.Color)
-            .HasForeignKey(pc => pc.ColorId)
-            .HasConstraintName("FK_ProductColor_Color");
+            .IsUnique();
 
         modelBuilder.Entity<OrderModel>()
             .HasKey(o => o.OrderId);
-        modelBuilder.Entity<OrderModel>()
-            .Property(o => o.ClientId)
-            .HasColumnName("order_id");
-
         modelBuilder.Entity<OrderModel>()
             .ToTable("Orders");
         modelBuilder.Entity<OrderModel>()
@@ -576,12 +386,6 @@ public class BankContext : IdentityDbContext<UserModel, IdentityRole<int>, int> 
             .WithMany(c => c.Orders)
             .HasForeignKey(o => o.ClientId)
             .HasConstraintName("FK_Order_Client")
-            .OnDelete(DeleteBehavior.NoAction);
-        modelBuilder.Entity<OrderModel>()
-            .HasMany(o => o.OrderItems)
-            .WithOne(oi => oi.Order)
-            .HasForeignKey(oi => oi.OrderId)
-            .HasConstraintName("FK_OrderItem_Order")
             .OnDelete(DeleteBehavior.NoAction);
         modelBuilder.Entity<OrderModel>()
             .HasOne(o => o.Payment)

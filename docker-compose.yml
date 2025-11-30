@@ -4,7 +4,6 @@ services:
     container_name: dlyah-app-container
     environment:
       - ConnectionStrings__Database=Server=db;Database=DB_DLyah;User Id=sa;Password=MrBars@1314;TrustServerCertificate=True
-      - ASPNETCORE_URLS=http://+:8000
       - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       db:
@@ -25,7 +24,7 @@ services:
     networks:
       - dlyah-net
     ports:
-      - "1433:1433"
+      - "1434:1433"
     healthcheck:
       test: [ "CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "MrBars@1314", "-C", "-q", "SELECT 1" ]
       interval: 10s

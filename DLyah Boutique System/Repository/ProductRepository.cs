@@ -89,6 +89,7 @@ public class ProductRepository : IProductRepository
             }
         }
 
+
         // Atualizar ProductImages (requer mais lógica dependendo de como você gerencia as imagens - adicionar, remover, etc.)
         // Este é um exemplo básico que remove todas as existentes e adiciona as novas
         productDb.ProductImages.Clear();
